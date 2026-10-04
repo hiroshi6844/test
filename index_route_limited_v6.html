@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Gate Battle</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#278f43;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+body{touch-action:none}
+#game{position:fixed;inset:0;overflow:hidden}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#hud{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:12px;right:12px;display:flex;justify-content:space-between;pointer-events:none;z-index:5}
+.badge{color:white;background:rgba(0,0,0,.58);padding:8px 13px;border-radius:18px;font-weight:900;font-size:15px;text-shadow:0 1px 2px #000}
+#message{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 18px);transform:translateX(-50%);background:rgba(0,0,0,.65);color:white;padding:10px 18px;border-radius:22px;font-size:14px;font-weight:800;white-space:nowrap;z-index:6;pointer-events:none}
+#start,#again{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10;border:0;border-radius:18px;background:#fff;color:#111;padding:17px 30px;font-size:20px;font-weight:900;box-shadow:0 8px 30px #0008}
+#again{display:none}
+#debug{display:none;position:absolute;left:8px;right:8px;bottom:70px;z-index:50;color:#fff;background:#8b0000e8;padding:9px;border-radius:10px;font-size:11px;white-space:pre-wrap;pointer-events:none}
+</style>
+</head>
+<body>
+<div id="game">
+<canvas id="canvas"></canvas>
+<div id="hud"><div class="badge">予備 <span id="count">20</span> / 出撃 <span id="fieldCount">0</span></div><div class="badge">敵 <span id="enemyCount">0</span>　STAGE <span id="stage">1</span></div></div>
+<div id="message">敵は中央の進路だけを前進｜大砲を左右にドラッグ・タップで発射</div>
+<button id="start">ゲームスタート</button>
+<button id="again">もう一度プレイ</button><div id="debug"></div>
+</div>
+<script>
+"use strict";
+const debugBox=document.getElementById("debug");
+window.addEventListener("error",function(e){
+  if(debugBox){debugBox.style.display="block";debugBox.textContent="JavaScript Error\n"+e.message+"\nline: "+e.lineno;}
+});
+window.addEventListener("unhandledrejection",function(e){
+  if(debugBox){debugBox.style.display="block";debugBox.textContent="Promise Error\n"+String(e.reason);}
+});
+
+const canvas=document.getElementById("canvas");
+const ctx=canvas.getContext("2d");
+const countEl=document.getElementById("count");
+const fieldCountEl=document.getElementById("fieldCount");
+const stageEl=document.getElementById("stage");
+const enemyCountEl=document.getElementById("enemyCount");
+const message=document.getElementById("message");
+const startBtn=document.getElementById("start");
+const againBtn=document.getElementById("again");
+
+let W=0,H=0,DPR=1;
+let running=false, gameState="ready", stage=1, reserve=20;
+let player=[], enemies=[], gates=[], particles=[], shots=[], floating=[];
+let shake=0;
+let last=0, accumulator=0, spawnTimer=0, cameraY=0;
+let roadX=0,roadW=0,cannonX=0,dragging=false,dragMoved=false,downX=0,downY=0;
+
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=window.innerWidth; H=window.innerHeight;
+  canvas.width=Math.floor(W*DPR); canvas.height=Math.floor(H*DPR);
+  canvas.style.width=W+"px";canvas.style.height=H+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  roadW=Math.min(W*0.74,440);
+  roadX=(W-roadW)/2;
+  cannonX=clamp(cannonX||W/2,roadX+26,roadX+roadW-26);
+}
+window.addEventListener("resize",resize);
+resize();
+
+function rand(a,b){return a+Math.random()*(b-a)}
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function updateHUD(){countEl.textContent=Math.max(0,Math.floor(reserve));fieldCountEl.textContent=player.filter(s=>!s.dead).length;enemyCountEl.textContent=enemies.filter(e=>!e.dead).length;stageEl.textContent=stage}
+
+function newSoldier(x,y){
+ return {x,y,vx:rand(-.18,.18),vy:rand(2.5,3.3),r:6,dead:false,gateIds:new Set(),hitCooldown:0};
+}
+function newEnemy(x,y){
+ // Enemies follow a fixed corridor lane, like the reference image.
+ const laneX=clamp(x,roadX+14,roadX+roadW-14);
+ return {x:laneX,y,laneX,vy:rand(.20,.34),r:6,dead:false,hp:1};
+}
+function makeGate(x,y,w,mult,color){
+ return {x,y,w,h:62,mult,color,used:false};
+}
+function setupStage(){
+  player=[]; enemies=[]; gates=[]; particles=[]; shots=[]; cannonX=W/2;
+  reserve=16+stage*4;
+  // No free pre-spawned soldiers: every unit on the field comes from the movable launcher.
+  // Gate choices: a large ×99 and ×20, plus a later ×20.
+  const y1=H*.39;
+  gates.push(makeGate(roadX+roadW*.06,y1,roadW*.39,99,"yellow"));
+  gates.push(makeGate(roadX+roadW*.55,y1,roadW*.39,20,"blue"));
+  const y2=H*.61;
+  gates.push(makeGate(roadX+roadW*.31,y2,roadW*.38,20,"blue"));
+
+  const rows=4+Math.min(stage,4);
+  const cols=Math.min(16,Math.floor(roadW/18));
+  for(let r=0;r<rows;r++){
+    for(let c=0;c<cols;c++){
+      const usable=roadW-36;
+      const ex=roadX+18+(cols<=1?usable/2:c*(usable/(cols-1)));
+      enemies.push(newEnemy(ex,95+r*18));
+    }
+  }
+  updateHUD();
+}
+function resetGame(){
+  stage=1;cameraY=0;gameState="playing";running=true;
+  startBtn.style.display="none";againBtn.style.display="none";
+  message.textContent="敵は中央の進路だけを前進｜大砲を左右にドラッグ・タップで発射";
+  message.style.display="block";
+  setupStage();
+}
+function fire(){
+  if(!running||gameState!=="playing")return;
+  const n=Math.min(1,reserve);
+  if(n<=0)return;
+  reserve-=n;
+  player.push(newSoldier(cannonX,H-110));
+  shots.push({x:cannonX,y:H-110,life:18});
+  updateHUD();
+  message.style.display="none";
+}
+function moveCannon(clientX){
+  const r=canvas.getBoundingClientRect();
+  cannonX=clamp(clientX-r.left,roadX+26,roadX+roadW-26);
+}
+canvas.addEventListener("pointerdown",e=>{
+  if(gameState!=="playing")return;
+  e.preventDefault(); dragging=true; dragMoved=false; downX=e.clientX; downY=e.clientY;
+  moveCannon(e.clientX); if(canvas.setPointerCapture)canvas.setPointerCapture(e.pointerId);
+},{passive:false});
+canvas.addEventListener("pointermove",e=>{
+  if(!dragging)return; e.preventDefault();
+  if(Math.abs(e.clientX-downX)>5||Math.abs(e.clientY-downY)>5)dragMoved=true;
+  moveCannon(e.clientX);
+},{passive:false});
+canvas.addEventListener("pointerup",e=>{
+  if(!dragging)return; e.preventDefault(); moveCannon(e.clientX); dragging=false;
+  if(!dragMoved)fire();
+},{passive:false});
+canvas.addEventListener("pointercancel",()=>{dragging=false});
+startBtn.addEventListener("click",resetGame);
+againBtn.addEventListener("click",resetGame);
+
+function gateFor(s){
+  for(const g of gates){
+    if(s.gateIds.has(g))continue;
+    if(s.x>g.x && s.x<g.x+g.w && s.y>g.y && s.y<g.y+g.h)return g;
+  }
+  return null;
+}
+function applyGate(s,g){
+  s.gateIds.add(g);
+  // Exact math: the one entering soldier remains, and mult-1 clones are created.
+  // x20 => 20 soldiers total. x99 => 99 soldiers total.
+  const clones=g.mult-1;
+  for(let i=0;i<clones;i++){
+    const n=newSoldier(s.x+rand(-24,24),s.y+rand(-8,12));
+    n.gateIds=new Set(s.gateIds);
+    player.push(n);
+  }
+  burst(s.x,s.y,Math.min(45,12+Math.floor(g.mult/3)),g.color==="yellow"?"#ffe44d":"#53c9ff");
+  floating.push({x:s.x,y:s.y,text:"×"+g.mult+" → "+g.mult+"人",life:45,color:g.color==="yellow"?"#ffe44d":"#53c9ff"});
+  shake=.12;
+  updateHUD();
+}
+function burst(x,y,n,color){
+  for(let i=0;i<n;i++)particles.push({x,y,vx:rand(-2.8,2.8),vy:rand(-2.5,2.5),life:rand(18,34),color});
+}
+function distance2(a,b){
+  const dx=a.x-b.x,dy=a.y-b.y;return dx*dx+dy*dy;
+}
+
+function update(dt){
+  if(!running||gameState!=="playing")return;
+
+  spawnTimer-=dt;
+  if(spawnTimer<=0){
+    spawnTimer=.45;
+  }
+
+  for(const s of player){
+    if(s.dead)continue;
+    s.prevX=s.x; s.prevY=s.y;
+    s.y-=s.vy*dt*60;
+    s.x+=s.vx*dt*60;
+    s.x=clamp(s.x,roadX+7,roadX+roadW-7);
+
+    const g=gateFor(s);
+    if(g)applyGate(s,g);
+
+    // Swept collision detection: checks the entire distance moved this frame.
+    // This prevents fast soldiers from visually passing through enemies.
+    let target=null,best=Infinity;
+    for(const e of enemies){
+      if(e.dead)continue;
+      const vx=s.x-s.prevX, vy=s.y-s.prevY;
+      const wx=e.x-s.prevX, wy=e.y-s.prevY;
+      const vv=vx*vx+vy*vy;
+      let t=vv>0?(wx*vx+wy*vy)/vv:0;
+      t=clamp(t,0,1);
+      const cx=s.prevX+t*vx, cy=s.prevY+t*vy;
+      const dx=e.x-cx,dy=e.y-cy,d=dx*dx+dy*dy;
+      const hitR=s.r+e.r+2;
+      if(d<hitR*hitR && d<best){best=d;target=e}
+    }
+    if(target){
+      target.dead=true;
+      s.dead=true;
+      burst(target.x,target.y,14,"#ff4f55");
+      burst(s.x,s.y,7,"#fff");
+      floating.push({x:target.x,y:target.y,text:"-1",life:35,color:"#ff4f55"});
+      shake=.05;
+    } else if(s.y<35){
+      s.dead=true;
+    }
+  }
+
+  // Enemy route is restricted to the central road.
+  // Each enemy keeps its assigned lane and only advances toward the cannon.
+  for(const e of enemies){
+    if(e.dead)continue;
+    e.y+=e.vy*dt*60;
+    e.x+=(e.laneX-e.x)*Math.min(1,dt*8);
+    e.x=clamp(e.x,roadX+10,roadX+roadW-10);
+  }
+
+  // Remove dead entities.
+  player=player.filter(s=>!s.dead);
+  enemies=enemies.filter(e=>!e.dead);
+
+  for(const p of particles){p.x+=p.vx*dt*60;p.y+=p.vy*dt*60;p.life-=dt*60}
+  particles=particles.filter(p=>p.life>0);
+  for(const s of shots)s.life-=dt*60;
+  shots=shots.filter(s=>s.life>0);
+  for(const f of floating){f.y-=0.6*dt*60;f.life-=dt*60}
+  floating=floating.filter(f=>f.life>0);
+  shake=Math.max(0,shake-dt);
+
+  const defenseY=H-118;
+  const breached=enemies.some(e=>!e.dead && e.y>=defenseY);
+  if(enemies.length===0){
+    gameState="clear";running=false;
+    message.textContent="STAGE CLEAR！";
+    message.style.display="block";
+    setTimeout(()=>{
+      stage++;
+      gameState="playing";running=true;
+      message.textContent="次のステージ！";
+      setupStage();
+    },900);
+  }else if(breached || (player.length===0 && reserve<=0)){
+    gameState="gameover";running=false;
+    message.textContent=breached?"敵が防衛ラインを突破！":"ゲームオーバー";
+    message.style.display="block";
+    againBtn.style.display="block";
+    burst(cannonX,H-105,28,"#ff4f55");
+  }
+}
+
+function drawBackground(){
+  ctx.fillStyle="#29984a";ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="#f1f2f1";ctx.fillRect(roadX,0,roadW,H);
+  ctx.strokeStyle="#d8d9d8";ctx.lineWidth=1;
+  for(let y=0;y<H;y+=42){
+    ctx.beginPath();ctx.moveTo(roadX,y);ctx.lineTo(roadX+roadW,y);ctx.stroke();
+  }
+  for(let x=roadX;x<=roadX+roadW;x+=42){
+    ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();
+  }
+  // dark side strips like the reference
+  ctx.fillStyle="#344039";
+  ctx.fillRect(0,0,Math.max(0,roadX-20),H);
+  ctx.fillRect(roadX+roadW+20,0,Math.max(0,W-roadX-roadW-20),H);
+}
+function drawEnemyCorridor(){
+  ctx.save();
+  const left=roadX+7, right=roadX+roadW-7;
+  ctx.strokeStyle="rgba(80,90,84,.55)";
+  ctx.lineWidth=3;
+  ctx.beginPath();ctx.moveTo(left,0);ctx.lineTo(left,H);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(right,0);ctx.lineTo(right,H);ctx.stroke();
+
+  // Direction arrows make the permitted enemy route obvious.
+  ctx.fillStyle="rgba(75,85,80,.22)";
+  const cx=(left+right)/2;
+  for(let y=125;y<H-160;y+=105){
+    ctx.beginPath();
+    ctx.moveTo(cx,y+28);
+    ctx.lineTo(cx-11,y+12);
+    ctx.lineTo(cx-4,y+12);
+    ctx.lineTo(cx-4,y);
+    ctx.lineTo(cx+4,y);
+    ctx.lineTo(cx+4,y+12);
+    ctx.lineTo(cx+11,y+12);
+    ctx.closePath();ctx.fill();
+  }
+  ctx.restore();
+}
+function drawGate(g){
+  ctx.save();
+  ctx.fillStyle=g.color==="yellow"?"#ffd51c":"#20a9ff";
+  ctx.shadowColor="#0007";ctx.shadowBlur=6;
+  ctx.fillRect(g.x,g.y,g.w,g.h);
+  ctx.shadowBlur=0;ctx.strokeStyle="#fff";ctx.lineWidth=3;ctx.strokeRect(g.x,g.y,g.w,g.h);
+  ctx.fillStyle="#fff";ctx.font="900 30px Arial";ctx.textAlign="center";ctx.textBaseline="middle";
+  ctx.fillText("×"+g.mult,g.x+g.w/2,g.y+g.h/2);
+  ctx.restore();
+}
+function drawPerson(p,enemy=false){
+  ctx.save();ctx.translate(p.x,p.y);
+  ctx.fillStyle=enemy?"#e52d34":"#087cff";
+  ctx.beginPath();ctx.arc(0,-5.5,p.r*.78,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(0,3.5,p.r*.82,p.r*1.05,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=enemy?"#ff9a9a":"#9bd4ff";ctx.lineWidth=1.7;
+  ctx.beginPath();ctx.moveTo(-2,9);ctx.lineTo(-3,13);ctx.moveTo(2,9);ctx.lineTo(3,13);ctx.stroke();
+  ctx.restore();
+}
+function drawDefenseLine(){
+  const y=H-118;
+  ctx.save();
+  ctx.strokeStyle="rgba(255,70,70,.72)";
+  ctx.lineWidth=2;
+  ctx.setLineDash([8,7]);
+  ctx.beginPath();ctx.moveTo(roadX,y);ctx.lineTo(roadX+roadW,y);ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle="rgba(180,20,20,.8)";
+  ctx.font="800 10px Arial";ctx.textAlign="left";
+  ctx.fillText("DEFENSE LINE",roadX+7,y-5);
+  ctx.restore();
+}
+function drawCannon(){
+  const y=H-55;
+  ctx.save();ctx.translate(cannonX,y);
+  ctx.fillStyle="#a56a29";ctx.fillRect(-23,3,46,20);
+  ctx.fillStyle="#d58b39";
+  ctx.beginPath();ctx.arc(-17,24,8,0,Math.PI*2);ctx.arc(17,24,8,0,Math.PI*2);ctx.fill();
+  ctx.save();ctx.rotate(-Math.PI/2);ctx.fillStyle="#4e5960";ctx.fillRect(-9,-4,18,34);ctx.fillStyle="#79848a";ctx.beginPath();ctx.arc(0,-4,9,0,Math.PI*2);ctx.fill();ctx.restore();
+  ctx.restore();
+}
+function draw(){
+  ctx.save();
+  if(shake>0)ctx.translate(rand(-2.5,2.5),rand(-2.5,2.5));
+  drawBackground();
+  drawEnemyCorridor();
+  for(const g of gates)drawGate(g);
+  for(const e of enemies)drawPerson(e,true);
+  for(const s of player)drawPerson(s,false);
+  for(const f of floating){
+    ctx.globalAlpha=Math.max(0,f.life/45);ctx.fillStyle=f.color;
+    ctx.font="900 20px Arial";ctx.textAlign="center";ctx.fillText(f.text,f.x,f.y);
+    ctx.globalAlpha=1;
+  }
+  for(const p of particles){
+    ctx.globalAlpha=Math.max(0,p.life/30);ctx.fillStyle=p.color;
+    ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  }
+  for(const q of shots){
+    ctx.globalAlpha=Math.max(0,q.life/18);ctx.fillStyle="#fff";
+    ctx.beginPath();ctx.arc(q.x,q.y,5,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1;
+  }
+  drawDefenseLine();
+  drawCannon();
+  ctx.restore();
+}
+function loop(t){
+  if(!last)last=t;
+  let dt=Math.min(.032,(t-last)/1000);
+  last=t;
+  update(dt);
+  draw();
+  requestAnimationFrame(loop);
+}
+try{
+  setupStage();
+  draw();
+  requestAnimationFrame(loop);
+  console.log("Gate Battle boot OK");
+}catch(err){
+  debugBox.style.display="block";
+  debugBox.textContent="起動エラー\n"+err.message+"\n"+(err.stack||"");
+}
+</script>
+</body>
+</html>
