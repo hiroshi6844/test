@@ -1,0 +1,229 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<title>Gate Battle</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#278f43;font-family:-apple-system,BlinkMacSystemFont,"Helvetica Neue",Arial,sans-serif}
+body{touch-action:none}
+#game{position:fixed;inset:0;overflow:hidden}
+canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+#hud{position:absolute;top:calc(env(safe-area-inset-top) + 10px);left:12px;right:12px;display:flex;justify-content:space-between;pointer-events:none;z-index:5}
+.badge{color:white;background:rgba(0,0,0,.58);padding:8px 13px;border-radius:18px;font-weight:900;font-size:15px;text-shadow:0 1px 2px #000}
+#message{position:absolute;left:50%;bottom:calc(env(safe-area-inset-bottom) + 18px);transform:translateX(-50%);background:rgba(0,0,0,.65);color:white;padding:10px 18px;border-radius:22px;font-size:14px;font-weight:800;white-space:nowrap;z-index:6;pointer-events:none}
+#start,#again{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:10;border:0;border-radius:18px;background:#fff;color:#111;padding:17px 30px;font-size:20px;font-weight:900;box-shadow:0 8px 30px #0008}
+#again{display:none}
+#debug{display:none;position:absolute;left:8px;bottom:5px;color:#fff;font-size:10px}
+#hud .pill{backdrop-filter:blur(5px);box-shadow:0 4px 14px #0005}
+#start,#again{background:linear-gradient(#fff,#e9eee9);box-shadow:0 8px 28px #0008}
+</style>
+</head>
+<body>
+<div id="game">
+<canvas id="canvas"></canvas>
+<div id="hud"><div class="badge">兵士：<span id="count">20</span></div><div class="badge">STAGE <span id="stage">1</span></div></div>
+<div id="message">タップして兵士を発射！</div>
+<button id="start">ゲームスタート</button>
+<button id="again">もう一度プレイ</button>
+</div>
+<script>
+"use strict";
+const canvas=document.getElementById("canvas"),ctx=canvas.getContext("2d");
+const countEl=document.getElementById("count"),stageEl=document.getElementById("stage");
+const message=document.getElementById("message"),startBtn=document.getElementById("start"),againBtn=document.getElementById("again");
+
+let W=0,H=0,DPR=1,roadX=0,roadW=0,last=0;
+let state="ready",stage=1,reserve=0,shake=0,totalEnemies=0;
+let soldiers=[],enemies=[],gates=[],particles=[],texts=[],muzzle=[];
+let audioCtx=null;
+
+function resize(){
+  DPR=Math.min(window.devicePixelRatio||1,2);
+  W=innerWidth; H=innerHeight;
+  canvas.width=Math.floor(W*DPR); canvas.height=Math.floor(H*DPR);
+  canvas.style.width=W+"px"; canvas.style.height=H+"px";
+  ctx.setTransform(DPR,0,0,DPR,0,0);
+  roadW=Math.min(W*.74,450); roadX=(W-roadW)/2;
+}
+addEventListener("resize",resize); resize();
+
+const rnd=(a,b)=>a+Math.random()*(b-a);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+
+function beep(freq=500,dur=.05,type="sine"){
+  try{
+    audioCtx ||= new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type=type;o.frequency.value=freq;
+    g.gain.setValueAtTime(.035,audioCtx.currentTime);
+    g.gain.exponentialRampToValueAtTime(.001,audioCtx.currentTime+dur);
+    o.connect(g);g.connect(audioCtx.destination);o.start();o.stop(audioCtx.currentTime+dur);
+  }catch(e){}
+}
+function makeSoldier(x,y){return{x,y,vx:rnd(-.18,.18),speed:rnd(120,160),r:rnd(5.2,6.3),dead:false}}
+function makeEnemy(x,y){return{x,y,speed:rnd(5,10),r:rnd(5.3,6.3),dead:false}}
+function makeGate(x,y,w,mult,type){return{x,y,w,h:64,mult,type,used:false,pulse:0}}
+
+function hud(){countEl.textContent=Math.max(0,Math.floor(reserve));stageEl.textContent=stage}
+function setupStage(){
+  soldiers=[];enemies=[];gates=[];particles=[];texts=[];muzzle=[];
+  reserve=18+stage*5;
+  for(let i=0;i<Math.min(14,reserve);i++) soldiers.push(makeSoldier(W/2+rnd(-28,28),H-122+rnd(-15,12)));
+
+  const y=H*.37;
+  if(stage%3===0){
+    gates.push(makeGate(roadX+roadW*.05,y,roadW*.40,30,"blue"));
+    gates.push(makeGate(roadX+roadW*.55,y,roadW*.40,50,"gold"));
+  }else{
+    gates.push(makeGate(roadX+roadW*.05,y,roadW*.40,99,"gold"));
+    gates.push(makeGate(roadX+roadW*.55,y,roadW*.40,20,"blue"));
+  }
+  gates.push(makeGate(roadX+roadW*.31,H*.59,roadW*.38,stage%2?20:50,stage%2?"blue":"gold"));
+
+  const rows=5+Math.min(5,Math.floor(stage/2)),cols=Math.min(17,Math.max(9,Math.floor(roadW/18)));
+  totalEnemies=rows*cols;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)
+    enemies.push(makeEnemy(roadX+15+c*(roadW-30)/(cols-1)+(r%2)*5,88+r*19));
+  hud();
+}
+function startGame(){
+  stage=1;state="playing";startBtn.style.display="none";againBtn.style.display="none";
+  message.style.display="block";message.textContent="タップして兵士を発射！";
+  setupStage();beep(520,.08,"square");
+}
+startBtn.onclick=startGame;
+againBtn.onclick=startGame;
+
+function fire(){
+  if(state!=="playing")return;
+  const n=Math.min(4,reserve);
+  if(!n){beep(130,.08,"sawtooth");return}
+  reserve-=n;
+  for(let i=0;i<n;i++)soldiers.push(makeSoldier(W/2+rnd(-27,27),H-108+rnd(-5,5)));
+  muzzle.push({x:W/2,y:H-108,life:.16});
+  message.style.display="none";hud();beep(570,.045,"square");
+}
+canvas.addEventListener("pointerdown",e=>{e.preventDefault();fire()},{passive:false});
+
+function burst(x,y,n,color){
+  for(let i=0;i<n;i++)particles.push({x,y,vx:rnd(-125,125),vy:rnd(-135,95),life:rnd(.25,.55),max:.55,color});
+}
+function popup(x,y,text,color="#fff"){texts.push({x,y,text,color,life:.8,max:.8})}
+function gateHit(s){
+  for(const g of gates)if(!g.used&&s.x>g.x&&s.x<g.x+g.w&&s.y>g.y&&s.y<g.y+g.h)return g;
+  return null;
+}
+function useGate(s,g){
+  g.used=true;g.pulse=1;
+  const add=g.mult>=99?Math.min(16,7+stage):g.mult>=50?Math.min(9,3+Math.floor(stage/2)):2;
+  for(let i=0;i<add;i++)soldiers.push(makeSoldier(s.x+rnd(-25,25),s.y+rnd(-8,8)));
+  reserve+=add;hud();
+  popup(s.x,s.y,"+"+add,g.type==="gold"?"#ffe45b":"#66dcff");
+  burst(s.x,s.y,30,g.type==="gold"?"#ffe45b":"#5bd2ff");
+  shake=.12;beep(g.mult>=50?830:640,.08,"triangle");
+}
+function nearest(s){
+  let best=null,bd=Infinity;
+  for(const e of enemies){
+    if(e.dead)continue;
+    const dx=e.x-s.x,dy=e.y-s.y,d=dx*dx+dy*dy;
+    if(d<bd){bd=d;best=e}
+  }
+  return bd<850?best:null;
+}
+function update(dt){
+  if(state!=="playing")return;
+
+  for(const s of soldiers){
+    if(s.dead)continue;
+    s.y-=s.speed*dt;s.x+=s.vx*dt*60;s.x=clamp(s.x,roadX+7,roadX+roadW-7);
+    const g=gateHit(s);if(g)useGate(s,g);
+
+    if(s.y<150){
+      const e=nearest(s);
+      if(e){
+        e.dead=true;s.dead=true;
+        burst(e.x,e.y,13,"#ff6565");burst(s.x,s.y,5,"#fff");popup(e.x,e.y,"KO");
+        shake=.04;
+      }
+    }
+    if(s.y<38)s.dead=true;
+  }
+  for(const e of enemies)if(!e.dead)e.y+=e.speed*dt;
+
+  soldiers=soldiers.filter(s=>!s.dead);
+  enemies=enemies.filter(e=>!e.dead);
+
+  for(const p of particles){p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=220*dt;p.life-=dt}
+  particles=particles.filter(p=>p.life>0);
+  for(const t of texts){t.y-=34*dt;t.life-=dt}
+  texts=texts.filter(t=>t.life>0);
+  for(const m of muzzle)m.life-=dt;
+  muzzle=muzzle.filter(m=>m.life>0);
+  shake=Math.max(0,shake-dt);
+
+  if(enemies.length===0){
+    state="clear";message.style.display="block";message.textContent="STAGE CLEAR！";
+    beep(900,.12,"triangle");
+    setTimeout(()=>{stage++;state="playing";setupStage();message.textContent="STAGE "+stage},900);
+  }else if(soldiers.length===0&&reserve<=0){
+    state="gameover";message.style.display="block";message.textContent="GAME OVER";
+    againBtn.style.display="block";beep(160,.16,"sawtooth");
+  }
+}
+
+function background(){
+  ctx.fillStyle="#29964a";ctx.fillRect(0,0,W,H);
+  ctx.fillStyle="#f0f2ef";ctx.fillRect(roadX,0,roadW,H);
+  ctx.strokeStyle="#d6dad7";ctx.lineWidth=1;
+  for(let y=0;y<H;y+=42){ctx.beginPath();ctx.moveTo(roadX,y);ctx.lineTo(roadX+roadW,y);ctx.stroke()}
+  for(let x=roadX;x<=roadX+roadW;x+=42){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke()}
+  ctx.fillStyle="#344039";ctx.fillRect(0,0,Math.max(0,roadX-18),H);ctx.fillRect(roadX+roadW+18,0,Math.max(0,W-roadX-roadW-18),H);
+}
+function drawGate(g){
+  ctx.save();
+  ctx.fillStyle=g.type==="gold"?"#ffd21c":"#20a9ff";
+  ctx.shadowColor="#0007";ctx.shadowBlur=8;ctx.fillRect(g.x,g.y,g.w,g.h);ctx.shadowBlur=0;
+  ctx.strokeStyle="#fff";ctx.lineWidth=3;ctx.strokeRect(g.x,g.y,g.w,g.h);
+  ctx.fillStyle="#fff";ctx.font="900 30px Arial";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText("×"+g.mult,g.x+g.w/2,g.y+g.h/2);
+  if(g.used){ctx.fillStyle="#ffffff45";ctx.fillRect(g.x,g.y,g.w,g.h)}
+  ctx.restore();
+}
+function person(p,red){
+  ctx.save();ctx.translate(p.x,p.y);
+  ctx.fillStyle=red?"#e52d35":"#087cff";
+  ctx.beginPath();ctx.arc(0,-6,p.r*.8,0,Math.PI*2);ctx.fill();
+  ctx.beginPath();ctx.ellipse(0,3.5,p.r*.82,p.r*1.08,0,0,Math.PI*2);ctx.fill();
+  ctx.strokeStyle=red?"#ff9b9b":"#a2daff";ctx.lineWidth=1.8;
+  ctx.beginPath();ctx.moveTo(-2,9);ctx.lineTo(-3,13);ctx.moveTo(2,9);ctx.lineTo(3,13);ctx.stroke();ctx.restore();
+}
+function cannon(){
+  const y=H-56;ctx.save();ctx.translate(W/2,y);
+  ctx.fillStyle="#a56a29";ctx.fillRect(-24,2,48,21);
+  ctx.fillStyle="#d78d3b";ctx.beginPath();ctx.arc(-17,25,8,0,Math.PI*2);ctx.arc(17,25,8,0,Math.PI*2);ctx.fill();
+  ctx.save();ctx.rotate(-Math.PI/2);ctx.fillStyle="#4e5960";ctx.fillRect(-9,-4,18,34);ctx.fillStyle="#7d878c";ctx.beginPath();ctx.arc(0,-4,9,0,Math.PI*2);ctx.fill();ctx.restore();ctx.restore();
+}
+function draw(){
+  ctx.save();
+  if(shake)ctx.translate(rnd(-2.5,2.5),rnd(-2.5,2.5));
+  background();
+  for(const g of gates)drawGate(g);
+  for(const e of enemies)person(e,true);
+  for(const s of soldiers)person(s,false);
+  for(const p of particles){ctx.globalAlpha=Math.max(0,p.life/p.max);ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,3.4,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
+  for(const t of texts){ctx.globalAlpha=Math.max(0,t.life/t.max);ctx.fillStyle=t.color;ctx.font="900 18px Arial";ctx.textAlign="center";ctx.fillText(t.text,t.x,t.y);ctx.globalAlpha=1}
+  for(const m of muzzle){ctx.globalAlpha=m.life/.16;ctx.fillStyle="#fff";ctx.beginPath();ctx.arc(m.x,m.y,7,0,Math.PI*2);ctx.fill();ctx.globalAlpha=1}
+  cannon();ctx.restore();
+}
+function loop(t){
+  if(!last)last=t;
+  const dt=Math.min(.033,(t-last)/1000);last=t;
+  update(dt);draw();requestAnimationFrame(loop);
+}
+setupStage();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
