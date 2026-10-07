@@ -5,6 +5,8 @@
 
 公開先: https://hiroshi6844.github.io/test/echo-hunt/
 
+ソース一式: [echo-hunt-source.zip](downloads/echo-hunt-source.zip) / [検証記録](TEST_REPORT.md)
+
 ## 遊び方
 
 1. Safari、Chromeなどで公開ページを開く。
@@ -112,6 +114,7 @@ node --test tests/core.test.mjs
 ## 確認環境
 
 自動テストの結果と実際のブラウザ確認は `TEST_REPORT.md` に記載。
+ルール・衝突等の22件と、Chromeのブラウザ統合検証19件が成功。公開ページの開始・短いクリックでの射撃も確認済み。
 **iPhone / iPad実機のSafariは未確認です。** モバイル表示と合成マルチタッチ検証は実機検証とは分けて記載します。
 
 ## 権利
