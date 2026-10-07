@@ -39,6 +39,9 @@ document.getElementById('run').addEventListener('click',async()=>{
   p.ammo[p.weapon]=1;key('keydown','KeyR');key('keyup','KeyR');assert(p.reload>0,'R reload');
   key('keydown','KeyQ');key('keyup','KeyQ');assert(p.weapon!==(old.weapon),'Q switch');assert(q.keys.size===0&&!q.input.jump,'key release');
  });
+ await check('1フレームより短い攻撃タップでも1発を発射',()=>{
+  const p=q.game.actors[0];p.reload=0;p.cooldown=0;const before=p.ammo[p.weapon];pointer(w,'attackBtn','pointerdown',31,0,0);pointer(w,'attackBtn','pointerup',31,0,0);assert(p.ammo[p.weapon]===before-1,'short tap was dropped');assert(!q.input.attack,'tap stuck');
+ });
  await check('人物表示・透明輪郭・透明度による実際の画素変化',()=>{
   q.pause();const g=q.game,p=g.actors[0],ally=g.actors[1],hidden=g.actors[2];for(const a of g.actors)a.alive=false;
   Object.assign(p,{alive:true,role:'human',x:2,y:0,z:18,yaw:0,pitch:0,moving:false,reload:0,lastShot:-10});

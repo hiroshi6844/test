@@ -78,7 +78,8 @@
 
 ## ファイルと開発
 
-- `index.template.html`: 編集するHTML。`build.py` が更新識別子を付けた `index.html` を生成。\n- `index.html` / `style.css` / `bundle.js`: そのまま静的配信するゲーム。
+- `index.template.html`: 編集するHTML。`build.py` が更新識別子を付けた `index.html` を生成。
+- `index.html` / `style.css` / `bundle.js`: そのまま静的配信するゲーム。
 - `echo-hunt.html`: CSS・JSを内蔵する1ファイル版。外部読込ゼロ。
 - `core.mjs`: ゲームルール、衝突、武器、BOT、経路探索。
 - `renderer.mjs`: WebGL 1・GPU非対応時のCanvas 3D補助描画、軽量モデル、照明、背景屈折、手元武器。
