@@ -5,7 +5,7 @@ const assert=(condition,message)=>{if(!condition)throw Error(message);};
 let passed=0,failed=0;
 async function check(name,fn){const row=document.createElement('li');checks.append(row);try{await fn();row.textContent='PASS — '+name;row.className='pass';passed++;}catch(e){row.textContent='FAIL — '+name+' / '+e.message;row.className='fail';failed++;}}
 function pointer(w,id,event,pid,x,y){w.document.getElementById(id).dispatchEvent(new w.PointerEvent(event,{bubbles:true,cancelable:true,pointerId:pid,pointerType:'touch',isPrimary:pid===11,clientX:x,clientY:y,buttons:event==='pointerup'?0:1}));}
-function pixelCount(q){q.renderer.render(q.game,null,false,false);const gl=q.renderer.gl,w=q.renderer.width,h=q.renderer.height,pixels=new Uint8Array(w*h*4);gl.readPixels(0,0,w,h,gl.RGBA,gl.UNSIGNED_BYTE,pixels);const colors=new Set();for(let i=0;i<pixels.length;i+=400)colors.add(pixels[i]+','+pixels[i+1]+','+pixels[i+2]);return {colors:colors.size,error:gl.getError()};}
+function pixelCount(q){q.renderer.render(q.game,null,false,false);const gl=q.renderer.gl,w=q.renderer.width,h=q.renderer.height;let pixels;if(gl){pixels=new Uint8Array(w*h*4);gl.readPixels(0,0,w,h,gl.RGBA,gl.UNSIGNED_BYTE,pixels);}else pixels=q.renderer.ctx.getImageData(0,0,w,h).data;const colors=new Set();for(let i=0;i<pixels.length;i+=400)colors.add(pixels[i]+','+pixels[i+1]+','+pixels[i+2]);return {colors:colors.size,error:gl?gl.getError():0};}
 frame.addEventListener('load',()=>{document.getElementById('summary').textContent=frame.contentWindow.gameReady?'準備完了。実行ボタンを押してください。':'読み込み確認中';});
 document.getElementById('run').addEventListener('click',async()=>{
  const run=document.getElementById('run');run.disabled=true;checks.innerHTML='';passed=failed=0;
@@ -13,7 +13,7 @@ document.getElementById('run').addEventListener('click',async()=>{
  if(!q){document.getElementById('summary').textContent='ゲームが読み込まれていません。';run.disabled=false;return;}
  await check('タイトル・3D描画・キャラクターの準備',()=>{assert(w.gameReady,'ready=false');assert(q.game.actors.length===8,'participants');assert(by('errorPanel').hidden,by('errorText').textContent);});
  await check('開始ボタンで人間としてゲーム開始・音声有効化',async()=>{d.querySelector('[data-role="human"]').click();by('start').click();await tick(w,5);assert(q.mode==='playing','mode');assert(q.game.actors[0].role==='human','role');assert(q.audio.ctx?.state==='running','audio='+q.audio.ctx?.state);});
- await check('ゲームの画面が単色ではなくWebGLエラーもない',()=>{const p=pixelCount(q);assert(p.colors>20,'colors='+p.colors);assert(p.error===0,'gl='+p.error);});
+ await check('ゲームの画面が単色ではなく描画エラーもない',()=>{const p=pixelCount(q);assert(p.colors>20,'colors='+p.colors);assert(p.error===0,'gl='+p.error);});
  await check('横向きスマートフォンの画面サイズとタッチボタン',async()=>{frame.width=844;frame.height=390;await tick(w,5);assert(by('world').width===844,'render width');assert(w.getComputedStyle(by('joystick')).display!=='none','joystick');assert(by('attackBtn').getBoundingClientRect().bottom<390,'attack clipped');});
  await check('移動・視点・攻撃の3指同時操作',async()=>{
   q.game.actors[0].cooldown=0;const p=q.game.actors[0],old={x:p.x,z:p.z,yaw:p.yaw},r=by('joystick').getBoundingClientRect();
@@ -32,6 +32,6 @@ document.getElementById('run').addEventListener('click',async()=>{
  await check('追加ルールの設定保存と新試合への反映',async()=>{q.home();by('settingsOpen').click();for(const id of ['flashlight','supplies','traitor']){by(id).checked=true;by(id).dispatchEvent(new w.Event('change'));}d.querySelector('#settingsPanel [data-close]').click();by('start').click();await tick(w,3);assert(q.game.cfg.supplies&&q.game.cfg.flashlight&&q.game.cfg.traitor,'rules');assert(q.game.actors.filter(a=>a.role==='traitor').length===1,'traitor');});
  await check('読み込みエラーに原因を表示',()=>{w.showFatal('QA: bundle.js 読み込み失敗の表示確認');assert(!by('errorPanel').hidden&&by('errorText').textContent.includes('bundle.js'),'error screen');by('errorPanel').hidden=true;});
  q.home();if(previousSettings===null)w.localStorage.removeItem('echo-hunt-settings');else w.localStorage.setItem('echo-hunt-settings',previousSettings);
- document.getElementById('summary').textContent=`完了: ${passed} PASS / ${failed} FAIL\nBrowser: ${navigator.userAgent}\n描画・音声・合成タッチ検証。iOS実機とSafari実機は未確認。`;
+ document.getElementById('summary').textContent=`完了: ${passed} PASS / ${failed} FAIL\nBrowser: ${navigator.userAgent}\n描画方式: ${q.renderer.kind}\n描画・音声・合成タッチ検証。iOS実機とSafari実機は未確認。`;
  run.disabled=false;
 });
