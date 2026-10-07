@@ -30,6 +30,24 @@ document.getElementById('run').addEventListener('click',async()=>{
  await check('結果から再プレイしてスコア・死亡数をリセット',async()=>{by('replay').click();await tick(w,3);assert(q.mode==='playing','replay');assert(q.game.actors.every(a=>a.score===0&&a.deaths===0),'reset');assert(q.game.actors.filter(a=>a.alive&&a.role==='hidden').length===1,'one hidden');});
  await check('再プレイを繰り返しても描画ループが1本',async()=>{for(let i=0;i<3;i++){by('start').click();await tick(w,2);}let previous=q.renderer.frames,sum=0;for(let i=0;i<6;i++){await tick(w,1);const delta=q.renderer.frames-previous;assert(delta<=1,'multiple renders='+delta);sum+=delta;previous=q.renderer.frames;}assert(sum>=4,'render stopped');});
  await check('追加ルールの設定保存と新試合への反映',async()=>{q.home();by('settingsOpen').click();for(const id of ['flashlight','supplies','traitor']){by(id).checked=true;by(id).dispatchEvent(new w.Event('change'));}d.querySelector('#settingsPanel [data-close]').click();by('start').click();await tick(w,3);assert(q.game.cfg.supplies&&q.game.cfg.flashlight&&q.game.cfg.traitor,'rules');assert(q.game.actors.filter(a=>a.role==='traitor').length===1,'traitor');});
+ await check('PCのWASD・Space・R・Qとキー解除',async()=>{
+  q.home();d.querySelector('[data-role="human"]').click();by('start').click();await tick(w,3);
+  const p=q.game.actors[0],old={x:p.x,z:p.z,weapon:p.weapon};
+  const key=(type,code)=>d.dispatchEvent(new w.KeyboardEvent(type,{code,key:code,bubbles:true,cancelable:true}));
+  key('keydown','KeyW');key('keydown','Space');await tick(w,12);key('keyup','KeyW');key('keyup','Space');
+  assert(Math.hypot(p.x-old.x,p.z-old.z)>.03,'W movement');assert(p.y>.05,'Space jump');
+  p.ammo[p.weapon]=1;key('keydown','KeyR');key('keyup','KeyR');assert(p.reload>0,'R reload');
+  key('keydown','KeyQ');key('keyup','KeyQ');assert(p.weapon!==(old.weapon),'Q switch');assert(q.keys.size===0&&!q.input.jump,'key release');
+ });
+ await check('人物表示・透明輪郭・透明度による実際の画素変化',()=>{
+  q.pause();const g=q.game,p=g.actors[0],ally=g.actors[1],hidden=g.actors[2];for(const a of g.actors)a.alive=false;
+  Object.assign(p,{alive:true,role:'human',x:2,y:0,z:18,yaw:0,pitch:0,moving:false,reload:0,lastShot:-10});
+  g.hiddenId=2;Object.assign(ally,{role:'human',x:2,y:0,z:13,yaw:Math.PI,moving:false});Object.assign(hidden,{role:'hidden',x:5,y:0,z:13,yaw:Math.PI,moving:false,cloak:1,reveal:0});
+  const image=()=>{q.renderer.render(g,null,false,false);if(!q.renderer.gl)return new Uint8Array(q.renderer.ctx.getImageData(0,0,q.renderer.width,q.renderer.height).data);const pixels=new Uint8Array(q.renderer.width*q.renderer.height*4);q.renderer.gl.readPixels(0,0,q.renderer.width,q.renderer.height,q.renderer.gl.RGBA,q.renderer.gl.UNSIGNED_BYTE,pixels);return pixels;};
+  const changed=(a,b)=>{let count=0;for(let i=0;i<a.length;i++)if(a[i]!==b[i])count++;return count;};
+  const empty=image();ally.alive=true;const human=image();assert(changed(empty,human)>500,'human model missing');
+  hidden.alive=true;const cloaked=image();assert(changed(human,cloaked)>100,'cloaked model missing');hidden.cloak=0;const faded=image();assert(changed(cloaked,faded)>500,'opacity did not affect visible pixels');
+ });
  await check('読み込みエラーに原因を表示',()=>{w.showFatal('QA: bundle.js 読み込み失敗の表示確認');assert(!by('errorPanel').hidden&&by('errorText').textContent.includes('bundle.js'),'error screen');by('errorPanel').hidden=true;});
  q.home();if(previousSettings===null)w.localStorage.removeItem('echo-hunt-settings');else w.localStorage.setItem('echo-hunt-settings',previousSettings);
  document.getElementById('summary').textContent=`完了: ${passed} PASS / ${failed} FAIL\nBrowser: ${navigator.userAgent}\n描画方式: ${q.renderer.kind}\n描画・音声・合成タッチ検証。iOS実機とSafari実機は未確認。`;
