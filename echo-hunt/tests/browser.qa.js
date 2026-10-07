@@ -34,8 +34,8 @@ document.getElementById('run').addEventListener('click',async()=>{
   q.home();d.querySelector('[data-role="human"]').click();by('start').click();await tick(w,3);
   const p=q.game.actors[0],old={x:p.x,z:p.z,weapon:p.weapon};
   const key=(type,code)=>d.dispatchEvent(new w.KeyboardEvent(type,{code,key:code,bubbles:true,cancelable:true}));
-  key('keydown','KeyW');key('keydown','Space');await tick(w,12);key('keyup','KeyW');key('keyup','Space');
-  assert(Math.hypot(p.x-old.x,p.z-old.z)>.03,'W movement');assert(p.y>.05,'Space jump');
+  key('keydown','KeyW');key('keydown','Space');await tick(w,1);assert(p.y>.05,'Space jump');await tick(w,11);key('keyup','KeyW');key('keyup','Space');
+  assert(Math.hypot(p.x-old.x,p.z-old.z)>.03,'W movement');
   p.ammo[p.weapon]=1;key('keydown','KeyR');key('keyup','KeyR');assert(p.reload>0,'R reload');
   key('keydown','KeyQ');key('keyup','KeyQ');assert(p.weapon!==(old.weapon),'Q switch');assert(q.keys.size===0&&!q.input.jump,'key release');
  });
