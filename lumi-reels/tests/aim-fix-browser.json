@@ -1,0 +1,262 @@
+{
+  "release": "1.1",
+  "browser": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+  "checkedAt": "2026-10-08T23:25:35.020Z",
+  "suite": {
+    "status": "PASS",
+    "tests": 11,
+    "assertions": 85665,
+    "scenarioCases": 45697,
+    "maxBonusForwardCells": 5.988627,
+    "results": [
+      {
+        "name": "BET不足・連打・単独停止・レバー抽選は1回",
+        "status": "PASS"
+      },
+      {
+        "name": "BIG・REG目押し成功：全6停止順と全設定",
+        "status": "PASS"
+      },
+      {
+        "name": "中段目押しの回帰検証：全停止順・全滑り幅・混在する押下位置",
+        "status": "PASS"
+      },
+      {
+        "name": "全3リールそれぞれの取りこぼし・持ち越し：全6停止順",
+        "status": "PASS"
+      },
+      {
+        "name": "先告知・後告知・重複当選防止・持ち越し中の小役優先",
+        "status": "PASS"
+      },
+      {
+        "name": "経過時間・滑り上限・速度連続・単調減速・前向き停止",
+        "status": "PASS"
+      },
+      {
+        "name": "全5ラインの図柄・判定・払い出し、リプレイの無料BET",
+        "status": "PASS"
+      },
+      {
+        "name": "ボーナス全G・全停止順・タイミング不問・最終払い出し先行",
+        "status": "PASS"
+      },
+      {
+        "name": "非当選役の見た目成立を排除：全41,472停止窓＋ランダム遊技",
+        "status": "PASS"
+      },
+      {
+        "name": "設定変更制限・確率表の単調性・メダル補充",
+        "status": "PASS"
+      },
+      {
+        "name": "アプリ中断・復帰・回転中保存・払い出し途中保存",
+        "status": "PASS"
+      }
+    ]
+  },
+  "aimCases": [
+    {
+      "role": "BIG",
+      "order": "012",
+      "notice": "BEFORE",
+      "targetText": "7 を狙おう",
+      "remaining": 50,
+      "centre": [
+        "BIG",
+        "BIG",
+        "BIG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    },
+    {
+      "role": "BIG",
+      "order": "021",
+      "notice": "BEFORE",
+      "targetText": "7 を狙おう",
+      "remaining": 50,
+      "centre": [
+        "BIG",
+        "BIG",
+        "BIG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    },
+    {
+      "role": "BIG",
+      "order": "102",
+      "notice": "BEFORE",
+      "targetText": "7 を狙おう",
+      "remaining": 50,
+      "centre": [
+        "BIG",
+        "BIG",
+        "BIG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    },
+    {
+      "role": "BIG",
+      "order": "120",
+      "notice": "BEFORE",
+      "targetText": "7 を狙おう",
+      "remaining": 50,
+      "centre": [
+        "BIG",
+        "BIG",
+        "BIG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    },
+    {
+      "role": "BIG",
+      "order": "201",
+      "notice": "BEFORE",
+      "targetText": "7 を狙おう",
+      "remaining": 50,
+      "centre": [
+        "BIG",
+        "BIG",
+        "BIG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    },
+    {
+      "role": "BIG",
+      "order": "210",
+      "notice": "BEFORE",
+      "targetText": "7 を狙おう",
+      "remaining": 50,
+      "centre": [
+        "BIG",
+        "BIG",
+        "BIG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    },
+    {
+      "role": "REG",
+      "order": "012",
+      "notice": "BEFORE",
+      "targetText": "BAR を狙おう",
+      "remaining": 20,
+      "centre": [
+        "REG",
+        "REG",
+        "REG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    },
+    {
+      "role": "REG",
+      "order": "021",
+      "notice": "BEFORE",
+      "targetText": "BAR を狙おう",
+      "remaining": 20,
+      "centre": [
+        "REG",
+        "REG",
+        "REG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    },
+    {
+      "role": "REG",
+      "order": "102",
+      "notice": "BEFORE",
+      "targetText": "BAR を狙おう",
+      "remaining": 20,
+      "centre": [
+        "REG",
+        "REG",
+        "REG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    },
+    {
+      "role": "REG",
+      "order": "120",
+      "notice": "BEFORE",
+      "targetText": "BAR を狙おう",
+      "remaining": 20,
+      "centre": [
+        "REG",
+        "REG",
+        "REG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    },
+    {
+      "role": "REG",
+      "order": "201",
+      "notice": "BEFORE",
+      "targetText": "BAR を狙おう",
+      "remaining": 20,
+      "centre": [
+        "REG",
+        "REG",
+        "REG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    },
+    {
+      "role": "REG",
+      "order": "210",
+      "notice": "BEFORE",
+      "targetText": "BAR を狙おう",
+      "remaining": 20,
+      "centre": [
+        "REG",
+        "REG",
+        "REG"
+      ],
+      "credits": 997,
+      "status": "PASS"
+    }
+  ],
+  "carryChecks": [
+    {
+      "stage": "REG後告知・左取りこぼし",
+      "pending": "REG",
+      "lamp": true,
+      "credits": 997,
+      "targetText": "BAR を狙おう",
+      "status": "PASS"
+    },
+    {
+      "stage": "持ち越し中の小役優先",
+      "pending": "REG",
+      "payout": 8,
+      "credits": 1002,
+      "message": "今回は小役・リプレイ優先。ボーナス当選は持ち越します。",
+      "status": "PASS"
+    },
+    {
+      "stage": "持ち越し後の中段BAR揃い",
+      "remaining": 20,
+      "net": 0,
+      "credits": 999,
+      "status": "PASS"
+    },
+    {
+      "stage": "ボーナス中・通常停止ボタンで任意停止",
+      "remaining": 19,
+      "payout": 8,
+      "net": 5,
+      "credits": 1004,
+      "status": "PASS"
+    }
+  ],
+  "note": "開発モードの原子的な位置指定で中段0.5コマ手前の押下を再現。Safari実機は未確認。"
+}
