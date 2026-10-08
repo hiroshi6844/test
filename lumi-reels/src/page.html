@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#121323">
+  <meta name="description" content="LUMI REELS — オリジナルの告知ランプと目押しを楽しむ、仮想メダル専用ブラウザスロット。">
+  <title>LUMI REELS — 光を、つかまえよう。</title>
+  <style>/*__CSS__*/</style>
+</head>
+<body>
+  <main class="app" id="app">
+    <nav class="topbar" aria-label="メニュー">
+      <div class="wordmark"><span class="spark">✦</span> LUMI <small>REELS</small></div>
+      <div class="top-actions">
+        <button id="mute" class="icon-button" aria-label="消音する" title="音の切り替え">♪</button>
+        <button id="pause" class="icon-button" aria-label="一時停止" title="一時停止">Ⅱ</button>
+        <button id="settingsOpen" class="icon-button" aria-label="設定と音量">⚙</button>
+        <button id="helpOpen" class="icon-button" aria-label="遊び方">?</button>
+      </div>
+    </nav>
+    <div class="balance-bar">
+      <div class="balance"><span class="overline">MEDALS <small>仮想メダル</small></span><strong id="credits">1,000</strong></div>
+      <div class="readout"><span>BET</span><strong id="betCount">0</strong></div>
+      <div class="readout"><span>PAYOUT</span><strong id="payout">0</strong></div>
+      <button id="refill" hidden class="refill">+1,000枚<br>補充</button>
+    </div>
+    <section class="machine" id="machine" aria-label="スロット台">
+      <div class="machine-head">
+        <div><h1>LUMI<span>REELS</span></h1><p>光を、つかまえよう。</p></div>
+        <span id="settingBadge" class="setting-badge">設定 <b>1</b></span>
+      </div>
+      <div id="bonusPanel" class="bonus-panel">
+        <div class="normal-banner"><span>✦</span> LIGHT UP YOUR NIGHT <span>✦</span></div>
+        <div class="bonus-content" hidden><b id="bonusTitle">BIG BONUS</b><span>残り <strong id="remaining">50</strong> G</span><span>純増 <strong id="bonusNet">+0</strong> 枚</span></div>
+        <div class="bonus-progress"><i id="bonusProgress"></i></div>
+      </div>
+      <div class="reel-surround">
+        <span class="line-pin top">1</span><span class="line-pin middle">2</span><span class="line-pin bottom">3</span>
+        <div class="reel-window" id="reelWindow">
+          <canvas class="reel" id="reel0" role="img" aria-label="左リール"></canvas>
+          <canvas class="reel" id="reel1" role="img" aria-label="中リール"></canvas>
+          <canvas class="reel" id="reel2" role="img" aria-label="右リール"></canvas>
+          <svg id="lineOverlay" viewBox="0 0 300 300" preserveAspectRatio="none" aria-hidden="true">
+            <path data-line="0" d="M0 50H300"/><path data-line="1" d="M0 150H300"/><path data-line="2" d="M0 250H300"/>
+            <path data-line="3" d="M0 0L300 300"/><path data-line="4" d="M0 300L300 0"/>
+          </svg>
+        </div>
+      </div>
+      <div class="line-strip"><span>5 LINES</span><span id="winLines">横3本 + 斜め2本</span><span id="phaseBadge">BET待ち</span></div>
+      <div class="stops" aria-label="リール停止">
+        <button class="stop-button" id="stop0" disabled aria-label="左リールを停止"><i></i><span>LEFT</span><small>左</small></button>
+        <button class="stop-button" id="stop1" disabled aria-label="中リールを停止"><i></i><span>CENTER</span><small>中</small></button>
+        <button class="stop-button" id="stop2" disabled aria-label="右リールを停止"><i></i><span>RIGHT</span><small>右</small></button>
+      </div>
+      <div class="play-controls">
+        <div class="lamp-wrap"><div id="lamp" class="lamp" role="status" aria-label="告知ランプ 消灯"><span class="lamp-star">✦</span><b>LUCK</b><small>GLOW</small></div><span id="lampCaption">BONUS SIGNAL</span></div>
+        <button id="betButton" class="bet-button"><span>3枚</span><b>BET</b><small>メダルを入れる</small></button>
+        <button id="lever" class="lever-button" disabled><span class="lever-art"><i></i></span><span><b>LEVER</b><small>レバーを叩く</small></span></button>
+      </div>
+      <div id="message" class="message" role="status" aria-live="polite">3枚BETで、はじめよう。</div>
+    </section>
+    <div class="stats" aria-label="遊技データ">
+      <div><span>総ゲーム</span><b id="totalGames">0</b><small>G</small></div>
+      <div><span>ボーナス後</span><b id="sinceBonus">0</b><small>G</small></div>
+      <div><span>BIG</span><b id="bigCount">0</b><small>回</small></div>
+      <div><span>REG</span><b id="regCount">0</b><small>回</small></div>
+    </div>
+    <footer><span id="soundStatus">最初の操作でサウンドON</span><span id="saveStatus">自動保存</span><span>VIRTUAL MEDALS ONLY</span></footer>
+    <section id="devPanel" class="dev-panel" hidden>
+      <h2>開発モード</h2><p>URLの ?dev=1 でのみ表示。検証用の操作は通常プレイで非表示です。</p>
+      <div class="dev-controls"><label>次の役<select id="forceRole"><option value="MISS">ハズレ</option><option value="BIG">BIG</option><option value="REG">REG</option><option value="GRAPE">ぶどう</option><option value="CHERRY">チェリー</option><option value="BELL">ベル</option><option value="REPLAY">リプレイ</option></select></label>
+      <label>告知<select id="forceNotice"><option value="AUTO">自動</option><option value="BEFORE">先告知</option><option value="AFTER">後告知</option></select></label><button id="forceApply">次レバーに強制当選</button></div>
+      <div id="devReels" class="dev-controls"></div>
+      <div class="dev-controls"><button id="devAdvance">時間を2秒進める</button><button id="devReset">検証データ初期化</button><button id="devSuite">エンジン検証を実行</button></div>
+      <p id="devNote">未指定</p><pre id="devState"></pre><pre id="devResults" hidden></pre>
+    </section>
+  </main>
+  <div id="pauseOverlay" class="pause-overlay" hidden><div><span>✦</span><h2>PAUSED</h2><p>遊技とサウンドを一時停止しています。</p><button id="resumeButton" class="primary">タップして再開</button></div></div>
+  <div id="helpModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="sheet"><div class="sheet-head"><h2 id="helpTitle">遊び方</h2><button data-close="helpModal" aria-label="遊び方を閉じる">×</button></div>
+      <div class="sheet-body">
+        <p class="intro">3枚BET → レバー → 左・中・右を好きな順番で停止。</p>
+        <ol><li>ランプが光ったらボーナス内部当選。<b>7・7・7</b>でBIG、<b>BAR・BAR・BAR</b>でREGが始まります。</li><li><b>全3リールで目押しが必要</b>です。図柄が上から流れてくるタイミングで停止。設定した滑りの範囲だけ引き込みます。届かなかった当選は次のゲームへ持ち越します。</li><li>有効ラインは横3本・斜め2本。目押しガイドをONにすると、ボーナス図柄を引き込める停止ボタンが緑に光ります。</li><li id="bonusRules">ボーナス中は目押し不要。BIG 50G／REG 20G、毎ゲーム3枚BETでぶどう8枚。全ゲーム完走でBIG純増250枚、REG純増100枚です。</li><li>リプレイ成立後はBET済みになるため、そのままレバーを操作します。</li></ol>
+        <div class="prizes" id="prizeList"></div>
+        <p>小役も3つ同じ図柄を有効ライン上に揃えると成立。スターは演出用で払い出しはありません。複数役の同時成立はしません。</p>
+        <p>ボーナス待機中の小役・リプレイ当選はそちらが優先です。そのゲームでボーナス図柄は揃えられず、当選は持ち越します。</p>
+        <p>PC：BでBET、Space／Enterでレバー、1・2・3で各リール停止、Pで一時停止、Mで消音。</p>
+        <p class="fineprint">実際のお金・景品・換金を使用しないオリジナルゲームです。保存が利用できない場合も遊べます。iOSのファイルプレビューはブラウザ実行環境ではありません。公開したページをSafariで開いてください。</p>
+      </div>
+    </div>
+  </div>
+  <div id="settingsModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="sheet"><div class="sheet-head"><h2 id="settingsTitle">設定とサウンド</h2><button data-close="settingsModal" aria-label="設定を閉じる">×</button></div>
+      <div class="sheet-body">
+        <div class="control-row"><label for="volume">音量 <b id="volumeValue">40%</b></label><input id="volume" type="range" min="0" max="100" step="5" value="40"></div>
+        <div class="control-row check-row"><label for="aimGuide">目押しガイド <small>ランプ点灯中のみ</small></label><input id="aimGuide" type="checkbox"></div>
+        <div class="control-row"><label for="slip">最大滑り <b id="slipValue">4コマ</b></label><input id="slip" type="range" min="3" max="6" step="1" value="4"></div>
+        <div class="control-row"><label for="speed">回転速度 <b id="speedValue">13.5コマ/秒</b></label><input id="speed" type="range" min="10" max="16" step="0.5" value="13.5"></div>
+        <p class="fineprint">滑り・速度は通常時のBET待ちに変更できます。最大滑りには停止位置までの端数も含まれます。</p>
+        <h3>設定1〜6</h3><p>本ゲーム独自の抽選確率。小役は目押しの結果により取りこぼすことがあります。</p>
+        <div class="table-scroll"><table><thead><tr><th>設定</th><th>BIG</th><th>REG</th><th>合成</th><th>ぶどう</th><th>チェリー</th><th>ベル</th><th>リプレイ</th></tr></thead><tbody id="oddsTable"></tbody></table></div>
+        <p class="fineprint">表は横にスクロールできます。レバーごとの排他的な抽選です。持ち越し中は新規ボーナスを抽選しません。</p>
+        <label class="setting-picker" for="settingSelect">設定を選ぶ<select id="settingSelect"><option value="1">設定1</option><option value="2">設定2</option><option value="3">設定3</option><option value="4">設定4</option><option value="5">設定5</option><option value="6">設定6</option></select></label>
+        <button id="applySetting" class="primary">この設定でデータをリセット</button><p id="settingLock" class="fineprint">通常時・BET待ち・ボーナス非当選時に変更できます。メダルは1,000枚に戻ります。</p>
+      </div>
+    </div>
+  </div>
+  <noscript><div class="pause-overlay"><p>このゲームにはJavaScriptが必要です。SafariのJavaScriptを有効にして、公開ページを開いてください。</p></div></noscript>
+  <script>/*__CONFIG__*/</script>
+  <script>/*__ENGINE__*/</script>
+  <script>/*__AUDIO__*/</script>
+  <script>/*__ART__*/</script>
+  <script>/*__QA__*/</script>
+  <script>/*__APP__*/</script>
+</body>
+</html>

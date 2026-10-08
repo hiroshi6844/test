@@ -1,0 +1,11 @@
+{
+  "name": "lumi-reels",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Original virtual-medal slot, with no browser runtime dependencies.",
+  "scripts": {
+    "dev": "node tools/dev-server.cjs",
+    "build": "python3 build.py",
+    "test": "node tests/engine.test.cjs"
+  }
+}

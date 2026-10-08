@@ -1,0 +1,1081 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+  <meta name="theme-color" content="#121323">
+  <meta name="description" content="LUMI REELS — オリジナルの告知ランプと目押しを楽しむ、仮想メダル専用ブラウザスロット。">
+  <title>LUMI REELS — 光を、つかまえよう。</title>
+  <style>:root { color-scheme:dark; --mint:#bcffe4; --ink:#131427; --muted:#9997b3; --border:#37364e; --pink:#ff749c; }
+* { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+[hidden] { display:none!important; }
+html { background:#10111e; min-height:100%; overscroll-behavior:none; }
+body { margin:0; color:#f3f0ff; font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif; -webkit-user-select:none; user-select:none; -webkit-touch-callout:none; overscroll-behavior:none; background:radial-gradient(ellipse at 20% 0%,#242342 0,transparent 55%),radial-gradient(ellipse at 100% 90%,#182b2c 0,transparent 45%),#10111e; }
+button,input,select { font:inherit; }
+button { cursor:pointer; color:inherit; border:0; touch-action:manipulation; }
+button:focus-visible,input:focus-visible,select:focus-visible { outline:3px solid var(--mint); outline-offset:3px; }
+button:disabled { cursor:default; }
+.app { max-width:584px; margin:0 auto; padding:calc(12px + env(safe-area-inset-top)) 18px calc(12px + env(safe-area-inset-bottom)); }
+.topbar { display:flex; align-items:center; justify-content:space-between; margin-bottom:10px; height:32px; }
+.wordmark { font-size:16px; font-weight:900; letter-spacing:3px; display:flex; align-items:center; gap:8px; }
+.wordmark small { font-size:9px; letter-spacing:2px; color:#9b99b7; font-weight:600; }
+.spark { color:var(--mint); font-size:26px; }
+.top-actions { display:flex; gap:6px; }
+.icon-button { height:32px; width:32px; border-radius:10px; background:#222239; border:1px solid #37354b; font-weight:800; font-size:18px; }
+.balance-bar { display:flex; align-items:center; gap:18px; margin-bottom:10px; padding:0 8px; }
+.balance { flex:1; }
+.overline { display:block; font-size:9px; letter-spacing:2px; color:#afacc7; font-weight:700; }
+.overline small { font-size:9px; letter-spacing:0; color:#77748e; margin-left:4px; }
+.balance strong { font-variant-numeric:tabular-nums; font-size:32px; font-weight:800; letter-spacing:1px; }
+.readout { min-width:45px; text-align:right; }
+.readout span { display:block; font-size:9px; letter-spacing:1px; color:var(--muted); }
+.readout strong { font-size:24px; font-variant-numeric:tabular-nums; color:#d9d5ed; }
+.refill { padding:8px; background:#bcffe4; color:#174a40; border-radius:9px; font-size:10px; font-weight:800; }
+.machine { border:1px solid #4e4969; border-radius:25px; padding:16px 22px 12px; background:linear-gradient(135deg,#39344f 0,#252439 36%,#222536 75%,#313247 100%); box-shadow:0 18px 70px #05061190,inset 0 1px 0 #82739688,inset 0 -3px 0 #131523; position:relative; }
+.machine:before { content:""; position:absolute; inset:5px; border:1px solid #76668025; border-radius:20px; pointer-events:none; }
+.machine-head { display:flex; justify-content:space-between; align-items:center; margin:0 3px 8px; }
+h1 { margin:0; font-size:30px; font-weight:900; letter-spacing:7px; line-height:1; text-shadow:0 2px 0 #0c0d1e; }
+h1 span { font-size:9px; letter-spacing:4px; display:inline-block; margin-left:12px; color:#c2b7d9; }
+.machine-head p { margin:6px 0 0; color:#a9a1bc; font-size:10px; letter-spacing:1px; }
+.setting-badge { color:#c2b9d6; background:#17182a; padding:7px 9px; border:1px solid #494158; border-radius:7px; font-size:10px; }
+.setting-badge b { font-size:16px; padding-left:4px; color:var(--mint); }
+.bonus-panel { margin:0 0 8px; height:33px; background:#171729; border:1px solid #444056; border-radius:9px; overflow:hidden; }
+.normal-banner { height:28px; display:flex; align-items:center; justify-content:center; gap:13px; font-size:9px; font-weight:700; letter-spacing:2px; color:#b4a0c6; }
+.normal-banner span { color:#dbc38c; font-size:16px; }
+.bonus-content { display:flex; align-items:center; justify-content:space-between; height:27px; padding:0 11px; font-size:10px; }
+.bonus-content b { color:#ffcf73; font-size:12px; letter-spacing:1px; }
+.bonus-content strong { color:white; font-size:19px; font-variant-numeric:tabular-nums; }
+.bonus-progress { height:3px; background:#171727; }
+.bonus-progress i { display:block; height:3px; width:0; background:#ffcc79; transition:width .15s; }
+.machine.bonus { border-color:#b98561; box-shadow:0 15px 60px #080710,inset 0 0 25px #a36a2c28,0 0 25px #ffb25514; }
+.machine.reg { border-color:#749fc5; }
+.machine.reg .bonus-content b { color:#a2d3ff; }
+.machine.reg .bonus-progress i { background:#a2d3ff; }
+.reel-surround { padding:6px; background:linear-gradient(135deg,#090c1b,#5a546a 46%,#111322 65%); border-radius:12px; box-shadow:inset 0 1px 4px #000; position:relative; }
+.reel-window { height:240px; height:clamp(150px,calc(var(--app-height,100vh) - 575px - env(safe-area-inset-top) - env(safe-area-inset-bottom)),330px); display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); grid-template-rows:minmax(0,1fr); border-radius:7px; overflow:hidden; background:#f7f4ed; position:relative; border:1px solid #161525; }
+.reel { width:100%; height:100%; min-width:0; min-height:0; display:block; border-right:3px solid #202231; }
+.reel:last-of-type { border-right:0; }
+#lineOverlay { position:absolute; inset:0; width:100%; height:100%; pointer-events:none; }
+#lineOverlay path { fill:none; stroke:#ff4090; stroke-width:2.3; opacity:0; filter:drop-shadow(0 0 3px #ff4090); vector-effect:non-scaling-stroke; }
+#lineOverlay path.active { opacity:.9; }
+.line-pin { position:absolute; left:-11px; color:#d5b878; font-size:8px; font-weight:900; width:9px; text-align:center; }
+.line-pin.top { top:16%; }.line-pin.middle { top:49%; }.line-pin.bottom { top:82%; }
+.line-strip { display:flex; justify-content:space-between; align-items:center; font-size:9px; height:25px; color:#8e88a1; padding:0 2px; }
+.line-strip>span:first-child { color:#c7b579; font-size:8px; letter-spacing:1px; font-weight:800; }
+#winLines.won { color:#ffacd3; }
+#phaseBadge { color:#bbb7d1; }
+.stops { display:grid; grid-template-columns:repeat(3,1fr); gap:12px; margin:4px 4px 11px; }
+.stop-button { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:3px; height:58px; padding:5px 0 3px; border-radius:14px; background:linear-gradient(#35364c,#242537); box-shadow:0 4px 0 #0e1020,inset 0 1px 0 #656077; border:1px solid #504c60; touch-action:none; }
+.stop-button i { display:block; width:39px; height:29px; border:2px solid #754858; border-radius:50%; background:radial-gradient(ellipse at 45% 20%,#ffa3a9,#d73b69 65%,#8a2f53); box-shadow:0 3px 0 #431529,inset 0 1px 2px #ffabb4; margin:0 calc((100% - 39px)/2) 2px; }
+.stop-button span { font-size:8px; letter-spacing:1px; color:#b1acc6; font-weight:700; }
+.stop-button small { color:#9d96af; font-size:9px; }
+.stop-button:disabled i { background:radial-gradient(ellipse at 45% 20%,#5d4258,#3a2a41 65%,#252438); border-color:#504057; box-shadow:0 3px 0 #161529; }
+.stop-button:active:not(:disabled) { transform:translateY(2px); box-shadow:0 2px 0 #0e1020; }
+.stop-button.aim { border-color:#bcffe4; box-shadow:0 4px 0 #0e1020,0 0 12px #bcffe430; }
+.stop-button.aim i { background:radial-gradient(ellipse at 45% 20%,#defff1,#6ecdac 65%,#357d70); border-color:#a3e9d2; }
+.play-controls { display:grid; grid-template-columns:1fr 1fr 1.55fr; gap:10px; align-items:center; margin:0 3px; }
+.lamp-wrap { display:flex; flex-direction:column; align-items:center; gap:5px; }
+.lamp { width:80px; height:62px; border-radius:50%; background:radial-gradient(ellipse,#2c283d,#171d2b); border:2px solid #4a4359; box-shadow:inset 0 0 15px #050917,0 2px 0 #0c0e1c; display:flex; flex-direction:column; align-items:center; justify-content:center; line-height:1; transform:rotate(-6deg); color:#615365; }
+.lamp-star { font-size:28px; position:absolute; top:4px; opacity:.6; }
+.lamp b { font-size:16px; letter-spacing:1px; margin-top:18px; font-weight:900; }
+.lamp small { font-size:7px; letter-spacing:3px; margin-top:3px; padding-left:2px; }
+.lamp-wrap>span { color:#8c839e; letter-spacing:1px; font-size:6px; font-weight:700; white-space:nowrap; }
+.lamp.lit { color:#fff4fb; background:radial-gradient(ellipse,#dc81ff,#8132b9 65%,#402c73); border-color:#e2b7ff; text-shadow:0 0 5px white,0 0 14px #ffd5ff; box-shadow:inset 0 0 9px #e392ff,0 0 14px #ce5bff8c,0 0 30px #c778ff45; }
+.lamp.lit .lamp-star { opacity:1; color:#ffee91; }
+.bet-button { height:68px; border-radius:14px; color:#1d483d; background:linear-gradient(#d0ffe8,#8fd3b8); border:1px solid #d9ffe9; box-shadow:0 4px 0 #33564e,inset 0 2px 0 #edfff5; display:flex; align-items:center; justify-content:center; flex-direction:column; touch-action:none; }
+.bet-button span { font-size:13px; font-weight:800; }.bet-button b { font-size:19px; letter-spacing:3px; }.bet-button small { font-size:7px; margin-top:2px; }
+.bet-button:disabled { background:linear-gradient(#495954,#394840); color:#85998d; border-color:#59685f; box-shadow:0 4px 0 #182a25; }
+.lever-button { height:68px; display:flex; align-items:center; justify-content:center; gap:12px; border-radius:14px; background:linear-gradient(#61506b,#3b3349); border:1px solid #8c708e; box-shadow:0 4px 0 #1b1a2b,inset 0 1px 0 #bb93ba55; touch-action:none; }
+.lever-button b { display:block; font-size:14px; letter-spacing:2px; color:#fbe7fb; }.lever-button small { font-size:8px; color:#c7b3cc; }
+.lever-button:disabled { background:linear-gradient(#323344,#272839); border-color:#4f4a5c; opacity:.65; }
+.lever-art { width:18px; height:42px; display:block; position:relative; }
+.lever-art:before { content:""; position:absolute; width:5px; height:25px; background:linear-gradient(90deg,#a1a0b2,#f3effa,#767586); bottom:3px; left:7px; transform:rotate(-15deg); }
+.lever-art:after { content:""; position:absolute; width:19px; height:19px; border-radius:50%; top:0; left:0; background:radial-gradient(circle at 35% 30%,#ff98a8,#c43e65 60%,#732a4d); box-shadow:0 2px 2px #1d1028; }
+.lever-art i { position:absolute; left:2px; bottom:0; width:19px; height:8px; border-radius:50%; background:#1a1729; border:1px solid #656171; }
+.bet-button:active:not(:disabled),.lever-button:active:not(:disabled) { transform:translateY(2px); }
+.message { margin-top:9px; min-height:28px; display:flex; justify-content:center; align-items:center; text-align:center; font-size:10px; color:#d9d2e6; padding:4px 4px 0; line-height:1.6; }
+.stats { display:grid; grid-template-columns:repeat(4,1fr); margin:14px 0 0; padding:0 6px; }
+.stats>div { text-align:center; border-right:1px solid #343247; }.stats>div:last-child { border-right:0; }
+.stats span { display:block; color:#9d96ad; font-size:9px; margin-bottom:2px; }.stats b { font-size:20px; font-variant-numeric:tabular-nums; }.stats small { font-size:8px; color:#716c85; margin-left:3px; }
+footer { display:flex; justify-content:space-between; margin-top:13px; padding:0 6px; font-size:7px; color:#6f6c82; letter-spacing:.2px; }
+.modal,.pause-overlay { position:fixed; inset:0; z-index:20; background:#070916cc; display:flex; align-items:center; justify-content:center; padding:16px; padding-bottom:calc(16px + env(safe-area-inset-bottom)); backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); touch-action:manipulation; }
+.sheet { width:min(100%,570px); max-height:calc(var(--app-height,100vh) - 48px); border:1px solid #554b6a; border-radius:20px; background:#232235; box-shadow:0 20px 70px #0009; display:flex; flex-direction:column; }
+.sheet-head { display:flex; align-items:center; justify-content:space-between; padding:15px 19px; border-bottom:1px solid #3a344d; }
+.sheet-head h2 { font-size:17px; margin:0; }.sheet-head button { background:#3d354e; width:33px; height:33px; border-radius:50%; font-size:22px; }
+.sheet-body { padding:16px 20px 24px; overflow-y:auto; -webkit-overflow-scrolling:touch; touch-action:manipulation; font-size:14px; color:#cbc6db; line-height:1.85; }
+.sheet-body ol { padding-left:22px; }.sheet-body li { padding-left:3px; margin-bottom:12px; }.sheet-body b { color:#fff0ff; }.sheet-body h3 { color:#f3ecff; font-size:16px; margin:24px 0 5px; }
+.intro { color:var(--mint); font-weight:700; }.fineprint { color:#9e95b3; font-size:10px; }
+.prizes { display:grid; grid-template-columns:repeat(3,1fr); gap:9px; margin:20px 0; }.prizes>div { background:#191b2c; border-radius:10px; padding:8px; text-align:center; }.prizes img { width:60px; height:45px; display:block; margin:0 auto; }.prizes small { font-size:9px; display:block; }
+.control-row { display:flex; flex-direction:column; gap:8px; margin:0 0 16px; }.control-row label { display:flex; justify-content:space-between; align-items:center; font-size:12px; }.control-row label b { color:var(--mint); }.control-row input[type=range] { width:100%; accent-color:var(--mint); height:24px; touch-action:pan-x; }
+.control-row.check-row { flex-direction:row; align-items:center; justify-content:space-between; }.check-row label { flex-direction:column; align-items:flex-start; }.check-row label small { font-size:9px; color:#9691a7; }.check-row input { width:22px; height:22px; accent-color:var(--mint); }
+.table-scroll { overflow-x:auto; touch-action:pan-x pan-y; }table { width:100%; min-width:480px; border-collapse:collapse; font-size:10px; }th,td { padding:7px 5px; text-align:center; border-bottom:1px solid #443a52; white-space:nowrap; }th { color:#e8dfff; }td { color:#b5a9c8; }tr.current td { color:var(--mint); background:#bcffe408; }
+.setting-picker { display:flex; justify-content:space-between; align-items:center; margin:20px 0 12px; }select { background:#171929; color:#efedff; border:1px solid #554965; border-radius:7px; padding:8px 12px; min-height:35px; font-size:16px; }
+.primary { width:100%; background:var(--mint); color:#204c40; border-radius:12px; padding:13px 15px; font-weight:800; font-size:13px; touch-action:manipulation; }.primary:disabled { background:#4b5b53; color:#95a49c; }
+.pause-overlay { z-index:30; }.pause-overlay>div { max-width:380px; width:100%; text-align:center; }.pause-overlay span { color:var(--mint); font-size:65px; }.pause-overlay h2 { letter-spacing:5px; font-size:26px; }.pause-overlay p { color:#b1a9c8; font-size:12px; margin-bottom:24px; }
+.dev-panel { background:#1c1c29; border:1px dashed #ab8bda; margin-top:20px; padding:15px; border-radius:12px; font-size:11px; }.dev-panel h2 { font-size:16px; }.dev-controls { display:flex; gap:8px; flex-wrap:wrap; margin:10px 0; align-items:flex-end; }.dev-controls label { display:flex; flex-direction:column; gap:3px; }.dev-controls button { padding:9px; background:#4c3d66; border-radius:6px; font-size:11px; }.dev-controls input { width:70px; padding:7px; font-size:16px; background:#111421; color:#ebedff; border:1px solid #796899; border-radius:5px; }.dev-panel pre { max-height:260px; overflow:auto; font-size:9px; user-select:text; -webkit-user-select:text; white-space:pre-wrap; touch-action:pan-y; color:#bdd9bd; }
+@media (min-width:700px) and (min-height:850px) { .app { padding-top:24px; }.topbar { margin-bottom:16px; }.machine { padding:20px 28px 14px; }.reel-window { height:clamp(180px,calc(var(--app-height,100vh) - 600px),330px); }.stops { margin-top:6px; }.message { font-size:12px; }.balance strong { font-size:35px; } }
+@media (max-width:390px) { .app { padding-left:12px; padding-right:12px; }.machine { padding-left:18px; padding-right:18px; }.play-controls { gap:8px; }.lamp { width:72px; height:62px; }.lever-button { gap:8px; }.balance-bar { gap:13px; }.wordmark { letter-spacing:2px; }.wordmark small { display:none; } }
+@media (max-height:720px) and (orientation:portrait) { .app { padding-top:calc(7px + env(safe-area-inset-top)); }.topbar { margin-bottom:9px; }.balance-bar { margin-bottom:9px; }.balance strong { font-size:27px; }.machine { padding-top:12px; }.machine-head { margin-bottom:8px; }h1 { font-size:29px; }.machine-head p { font-size:9px; }.reel-window { height:clamp(105px,calc(var(--app-height,100vh) - 530px - env(safe-area-inset-top) - env(safe-area-inset-bottom)),255px); }.bonus-panel { height:33px; margin-bottom:7px; }.normal-banner,.bonus-content { height:27px; }.stops { margin-bottom:9px; gap:9px; }.stop-button { height:56px; }.stop-button i { height:24px; width:34px; margin:0 calc((100% - 34px)/2) 0; }.bet-button,.lever-button { height:63px; }.lamp { height:59px; width:70px; }.message { margin-top:8px; min-height:29px; font-size:9px; }.stats { margin-top:11px; }.stats b { font-size:17px; }footer { margin-top:9px; } }
+@media (orientation:landscape) and (max-height:600px) {
+  .app { max-width:950px; padding:calc(8px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(8px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left)); display:grid; grid-template-columns:150px 1fr; column-gap:17px; }
+  .topbar { grid-column:1; display:block; height:auto; margin:4px 0 0; }.wordmark { margin-bottom:14px; font-size:18px; }.wordmark small { display:none; }.top-actions { gap:4px; }
+  .balance-bar { grid-column:1; grid-row:2; margin:0; flex-wrap:wrap; gap:10px; align-content:start; padding:0; }.balance { flex-basis:100%; }.balance strong { font-size:33px; }.readout { text-align:left; }.stats { grid-column:1; grid-row:3; grid-template-columns:1fr 1fr; gap:9px; margin:0; padding:0; }.stats>div { border:0; text-align:left; }.stats b { font-size:19px; }footer { grid-column:1; display:block; margin:8px 0 0; padding:0; }footer span { display:block; margin:4px 0; }
+  .machine { grid-column:2; grid-row:1/5; padding:12px 15px 8px; border-radius:18px; display:grid; grid-template-columns:1fr 140px; gap:0 13px; }.machine-head { grid-column:1/3; height:44px; margin:0 2px 7px; }h1 { font-size:25px; }h1 span { display:inline; font-size:9px; letter-spacing:3px; padding-left:10px; }.machine-head p { font-size:8px; margin-top:4px; }.setting-badge { padding:4px 7px; }
+  .bonus-panel { grid-column:1/3; height:29px; margin-bottom:7px; }.normal-banner,.bonus-content { height:24px; }.reel-surround { grid-column:1; grid-row:3; }.reel-window { height:clamp(100px,calc(var(--app-height,100vh) - 230px),260px); }.line-strip { grid-column:1; height:21px; font-size:7px; }.stops { grid-column:1; gap:8px; margin:2px 2px 5px; }.stop-button { height:43px; gap:2px; flex-wrap:nowrap; }.stop-button i { width:27px; height:24px; margin:0 5px 0 0; flex:none; }.stop-button span { display:none; }.stop-button small { font-size:10px; }
+  .play-controls { grid-column:2; grid-row:3/6; display:flex; flex-direction:column; margin:0; gap:10px; justify-content:center; }.lamp { height:62px; width:78px; }.lamp-wrap { gap:4px; }.bet-button { width:100%; height:57px; flex:none; }.bet-button span { display:none; }.bet-button b { font-size:17px; }.lever-button { width:100%; height:59px; flex:none; }.lever-button b { font-size:13px; }.message { grid-column:1/3; min-height:21px; font-size:9px; margin:0; }.dev-panel { grid-column:1/3; }
+}
+@media (prefers-reduced-motion:reduce) { .bonus-progress i { transition:none; } }
+@media (max-height:620px) and (orientation:portrait) {
+  .app { padding-top:calc(5px + env(safe-area-inset-top)); padding-bottom:calc(5px + env(safe-area-inset-bottom)); }
+  .topbar { margin-bottom:6px; height:29px; }.icon-button { width:29px; height:29px; }
+  .balance-bar { margin-bottom:7px; }.balance strong { font-size:24px; }
+  .machine { padding-top:10px; padding-bottom:9px; }.machine-head { margin-bottom:7px; }h1 { font-size:23px; }.machine-head p { display:none; }
+  .bonus-panel { height:25px; margin-bottom:6px; }.normal-banner,.bonus-content { height:20px; }.normal-banner { font-size:7px; letter-spacing:1.5px; }.bonus-content strong { font-size:16px; }.bonus-content b { font-size:9px; }
+  .reel-window { height:clamp(105px,calc(var(--app-height,100vh) - 460px - env(safe-area-inset-top) - env(safe-area-inset-bottom)),200px); }
+  .line-strip { height:20px; font-size:8px; }.stops { margin-top:3px; margin-bottom:7px; }.stop-button { height:48px; }
+  .bet-button,.lever-button { height:56px; }.lamp { height:54px; width:65px; }.lamp b { font-size:14px; }.lamp-star { font-size:24px; }
+  .message { margin-top:6px; min-height:24px; }.stats { margin-top:8px; }.stats b { font-size:15px; }.stats span { margin-bottom:1px; }footer { margin-top:6px; }
+}
+</style>
+</head>
+<body>
+  <main class="app" id="app">
+    <nav class="topbar" aria-label="メニュー">
+      <div class="wordmark"><span class="spark">✦</span> LUMI <small>REELS</small></div>
+      <div class="top-actions">
+        <button id="mute" class="icon-button" aria-label="消音する" title="音の切り替え">♪</button>
+        <button id="pause" class="icon-button" aria-label="一時停止" title="一時停止">Ⅱ</button>
+        <button id="settingsOpen" class="icon-button" aria-label="設定と音量">⚙</button>
+        <button id="helpOpen" class="icon-button" aria-label="遊び方">?</button>
+      </div>
+    </nav>
+    <div class="balance-bar">
+      <div class="balance"><span class="overline">MEDALS <small>仮想メダル</small></span><strong id="credits">1,000</strong></div>
+      <div class="readout"><span>BET</span><strong id="betCount">0</strong></div>
+      <div class="readout"><span>PAYOUT</span><strong id="payout">0</strong></div>
+      <button id="refill" hidden class="refill">+1,000枚<br>補充</button>
+    </div>
+    <section class="machine" id="machine" aria-label="スロット台">
+      <div class="machine-head">
+        <div><h1>LUMI<span>REELS</span></h1><p>光を、つかまえよう。</p></div>
+        <span id="settingBadge" class="setting-badge">設定 <b>1</b></span>
+      </div>
+      <div id="bonusPanel" class="bonus-panel">
+        <div class="normal-banner"><span>✦</span> LIGHT UP YOUR NIGHT <span>✦</span></div>
+        <div class="bonus-content" hidden><b id="bonusTitle">BIG BONUS</b><span>残り <strong id="remaining">50</strong> G</span><span>純増 <strong id="bonusNet">+0</strong> 枚</span></div>
+        <div class="bonus-progress"><i id="bonusProgress"></i></div>
+      </div>
+      <div class="reel-surround">
+        <span class="line-pin top">1</span><span class="line-pin middle">2</span><span class="line-pin bottom">3</span>
+        <div class="reel-window" id="reelWindow">
+          <canvas class="reel" id="reel0" role="img" aria-label="左リール"></canvas>
+          <canvas class="reel" id="reel1" role="img" aria-label="中リール"></canvas>
+          <canvas class="reel" id="reel2" role="img" aria-label="右リール"></canvas>
+          <svg id="lineOverlay" viewBox="0 0 300 300" preserveAspectRatio="none" aria-hidden="true">
+            <path data-line="0" d="M0 50H300"/><path data-line="1" d="M0 150H300"/><path data-line="2" d="M0 250H300"/>
+            <path data-line="3" d="M0 0L300 300"/><path data-line="4" d="M0 300L300 0"/>
+          </svg>
+        </div>
+      </div>
+      <div class="line-strip"><span>5 LINES</span><span id="winLines">横3本 + 斜め2本</span><span id="phaseBadge">BET待ち</span></div>
+      <div class="stops" aria-label="リール停止">
+        <button class="stop-button" id="stop0" disabled aria-label="左リールを停止"><i></i><span>LEFT</span><small>左</small></button>
+        <button class="stop-button" id="stop1" disabled aria-label="中リールを停止"><i></i><span>CENTER</span><small>中</small></button>
+        <button class="stop-button" id="stop2" disabled aria-label="右リールを停止"><i></i><span>RIGHT</span><small>右</small></button>
+      </div>
+      <div class="play-controls">
+        <div class="lamp-wrap"><div id="lamp" class="lamp" role="status" aria-label="告知ランプ 消灯"><span class="lamp-star">✦</span><b>LUCK</b><small>GLOW</small></div><span id="lampCaption">BONUS SIGNAL</span></div>
+        <button id="betButton" class="bet-button"><span>3枚</span><b>BET</b><small>メダルを入れる</small></button>
+        <button id="lever" class="lever-button" disabled><span class="lever-art"><i></i></span><span><b>LEVER</b><small>レバーを叩く</small></span></button>
+      </div>
+      <div id="message" class="message" role="status" aria-live="polite">3枚BETで、はじめよう。</div>
+    </section>
+    <div class="stats" aria-label="遊技データ">
+      <div><span>総ゲーム</span><b id="totalGames">0</b><small>G</small></div>
+      <div><span>ボーナス後</span><b id="sinceBonus">0</b><small>G</small></div>
+      <div><span>BIG</span><b id="bigCount">0</b><small>回</small></div>
+      <div><span>REG</span><b id="regCount">0</b><small>回</small></div>
+    </div>
+    <footer><span id="soundStatus">最初の操作でサウンドON</span><span id="saveStatus">自動保存</span><span>VIRTUAL MEDALS ONLY</span></footer>
+    <section id="devPanel" class="dev-panel" hidden>
+      <h2>開発モード</h2><p>URLの ?dev=1 でのみ表示。検証用の操作は通常プレイで非表示です。</p>
+      <div class="dev-controls"><label>次の役<select id="forceRole"><option value="MISS">ハズレ</option><option value="BIG">BIG</option><option value="REG">REG</option><option value="GRAPE">ぶどう</option><option value="CHERRY">チェリー</option><option value="BELL">ベル</option><option value="REPLAY">リプレイ</option></select></label>
+      <label>告知<select id="forceNotice"><option value="AUTO">自動</option><option value="BEFORE">先告知</option><option value="AFTER">後告知</option></select></label><button id="forceApply">次レバーに強制当選</button></div>
+      <div id="devReels" class="dev-controls"></div>
+      <div class="dev-controls"><button id="devAdvance">時間を2秒進める</button><button id="devReset">検証データ初期化</button><button id="devSuite">エンジン検証を実行</button></div>
+      <p id="devNote">未指定</p><pre id="devState"></pre><pre id="devResults" hidden></pre>
+    </section>
+  </main>
+  <div id="pauseOverlay" class="pause-overlay" hidden><div><span>✦</span><h2>PAUSED</h2><p>遊技とサウンドを一時停止しています。</p><button id="resumeButton" class="primary">タップして再開</button></div></div>
+  <div id="helpModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="helpTitle">
+    <div class="sheet"><div class="sheet-head"><h2 id="helpTitle">遊び方</h2><button data-close="helpModal" aria-label="遊び方を閉じる">×</button></div>
+      <div class="sheet-body">
+        <p class="intro">3枚BET → レバー → 左・中・右を好きな順番で停止。</p>
+        <ol><li>ランプが光ったらボーナス内部当選。<b>7・7・7</b>でBIG、<b>BAR・BAR・BAR</b>でREGが始まります。</li><li><b>全3リールで目押しが必要</b>です。図柄が上から流れてくるタイミングで停止。設定した滑りの範囲だけ引き込みます。届かなかった当選は次のゲームへ持ち越します。</li><li>有効ラインは横3本・斜め2本。目押しガイドをONにすると、ボーナス図柄を引き込める停止ボタンが緑に光ります。</li><li id="bonusRules">ボーナス中は目押し不要。BIG 50G／REG 20G、毎ゲーム3枚BETでぶどう8枚。全ゲーム完走でBIG純増250枚、REG純増100枚です。</li><li>リプレイ成立後はBET済みになるため、そのままレバーを操作します。</li></ol>
+        <div class="prizes" id="prizeList"></div>
+        <p>小役も3つ同じ図柄を有効ライン上に揃えると成立。スターは演出用で払い出しはありません。複数役の同時成立はしません。</p>
+        <p>ボーナス待機中の小役・リプレイ当選はそちらが優先です。そのゲームでボーナス図柄は揃えられず、当選は持ち越します。</p>
+        <p>PC：BでBET、Space／Enterでレバー、1・2・3で各リール停止、Pで一時停止、Mで消音。</p>
+        <p class="fineprint">実際のお金・景品・換金を使用しないオリジナルゲームです。保存が利用できない場合も遊べます。iOSのファイルプレビューはブラウザ実行環境ではありません。公開したページをSafariで開いてください。</p>
+      </div>
+    </div>
+  </div>
+  <div id="settingsModal" class="modal" hidden role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+    <div class="sheet"><div class="sheet-head"><h2 id="settingsTitle">設定とサウンド</h2><button data-close="settingsModal" aria-label="設定を閉じる">×</button></div>
+      <div class="sheet-body">
+        <div class="control-row"><label for="volume">音量 <b id="volumeValue">40%</b></label><input id="volume" type="range" min="0" max="100" step="5" value="40"></div>
+        <div class="control-row check-row"><label for="aimGuide">目押しガイド <small>ランプ点灯中のみ</small></label><input id="aimGuide" type="checkbox"></div>
+        <div class="control-row"><label for="slip">最大滑り <b id="slipValue">4コマ</b></label><input id="slip" type="range" min="3" max="6" step="1" value="4"></div>
+        <div class="control-row"><label for="speed">回転速度 <b id="speedValue">13.5コマ/秒</b></label><input id="speed" type="range" min="10" max="16" step="0.5" value="13.5"></div>
+        <p class="fineprint">滑り・速度は通常時のBET待ちに変更できます。最大滑りには停止位置までの端数も含まれます。</p>
+        <h3>設定1〜6</h3><p>本ゲーム独自の抽選確率。小役は目押しの結果により取りこぼすことがあります。</p>
+        <div class="table-scroll"><table><thead><tr><th>設定</th><th>BIG</th><th>REG</th><th>合成</th><th>ぶどう</th><th>チェリー</th><th>ベル</th><th>リプレイ</th></tr></thead><tbody id="oddsTable"></tbody></table></div>
+        <p class="fineprint">表は横にスクロールできます。レバーごとの排他的な抽選です。持ち越し中は新規ボーナスを抽選しません。</p>
+        <label class="setting-picker" for="settingSelect">設定を選ぶ<select id="settingSelect"><option value="1">設定1</option><option value="2">設定2</option><option value="3">設定3</option><option value="4">設定4</option><option value="5">設定5</option><option value="6">設定6</option></select></label>
+        <button id="applySetting" class="primary">この設定でデータをリセット</button><p id="settingLock" class="fineprint">通常時・BET待ち・ボーナス非当選時に変更できます。メダルは1,000枚に戻ります。</p>
+      </div>
+    </div>
+  </div>
+  <noscript><div class="pause-overlay"><p>このゲームにはJavaScriptが必要です。SafariのJavaScriptを有効にして、公開ページを開いてください。</p></div></noscript>
+  <script>/* LUMI REELS — all tunable game values live here. No real-money wagering. */
+(function (root) {
+  'use strict';
+  const C = {
+    version: 1,
+    initialMedals: 1000, bet: 3, speed: 13.5, brakeSeconds: 0.12,
+    maxSlip: 4, slipMin: 3, slipMax: 6, bonusMaxTravel: 6, coinSeconds: 0.035,
+    bonusIntroSeconds: 1.65, bonusOutroSeconds: 1.4,
+    announcementBeforeChance: 0.5,
+    noticeFlashSeconds: 0.25,
+    bonus: { BIG: { games: 50 }, REG: { games: 20 } },
+    payouts: { GRAPE: 8, CHERRY: 2, BELL: 10, REPLAY: 0, BIG: 0, REG: 0 },
+    labels: { MISS: 'ハズレ', BIG: 'BIG', REG: 'REG', GRAPE: 'ぶどう', CHERRY: 'チェリー', BELL: 'ベル', REPLAY: 'リプレイ', STAR: 'スター' },
+    // Denominators of mutually exclusive lever draws. These are original game odds.
+    settings: [
+      { BIG: 240, REG: 360, GRAPE: 6.5, CHERRY: 32, BELL: 96, REPLAY: 7.3 },
+      { BIG: 225, REG: 315, GRAPE: 6.4, CHERRY: 32, BELL: 96, REPLAY: 7.3 },
+      { BIG: 210, REG: 280, GRAPE: 6.3, CHERRY: 32, BELL: 96, REPLAY: 7.3 },
+      { BIG: 195, REG: 245, GRAPE: 6.2, CHERRY: 32, BELL: 96, REPLAY: 7.3 },
+      { BIG: 180, REG: 215, GRAPE: 6.1, CHERRY: 32, BELL: 96, REPLAY: 7.3 },
+      { BIG: 165, REG: 185, GRAPE: 6.0, CHERRY: 32, BELL: 96, REPLAY: 7.3 }
+    ],
+    lines: [[0,0,0], [1,1,1], [2,2,2], [0,1,2], [2,1,0]],
+    lineNames: ['上段', '中段', '下段', '右下がり', '右上がり'],
+    // 24 fixed symbols per reel. STAR is decoration and has no prize.
+    // Nonidentical strips also prevent forced, unauthorised wins in a 3-cell stop window.
+    strips: [
+      ['CHERRY','BIG','GRAPE','STAR','REPLAY','GRAPE','STAR','REPLAY','GRAPE','STAR','STAR','GRAPE','CHERRY','BELL','GRAPE','REPLAY','REG','GRAPE','CHERRY','BELL','GRAPE','REPLAY','BELL','GRAPE'],
+      ['STAR','BELL','GRAPE','REG','REPLAY','GRAPE','CHERRY','REPLAY','GRAPE','BIG','REPLAY','GRAPE','CHERRY','BELL','GRAPE','STAR','REPLAY','GRAPE','STAR','STAR','GRAPE','CHERRY','BELL','GRAPE'],
+      ['REPLAY','CHERRY','GRAPE','REPLAY','BELL','GRAPE','CHERRY','STAR','GRAPE','BELL','REPLAY','GRAPE','STAR','STAR','GRAPE','STAR','BIG','GRAPE','BELL','REPLAY','GRAPE','REG','CHERRY','GRAPE']
+    ]
+  };
+  root.LUMI_CONFIG = C;
+  if (typeof module !== 'undefined' && module.exports) module.exports = C;
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+</script>
+  <script>/* Deterministic, time-based game engine. DOM and audio are deliberately separate. */
+(function (root) {
+  'use strict';
+  const C = root.LUMI_CONFIG;
+  const ROLES = ['BIG','REG','GRAPE','CHERRY','BELL','REPLAY'];
+  const mod = (v, n = 24) => ((v % n) + n) % n;
+  const clone = x => JSON.parse(JSON.stringify(x));
+  const bit = role => 1 << ROLES.indexOf(role);
+  function boardAt(positions) {
+    return positions.map((p, r) => [0,1,2].map(row => C.strips[r][mod(-Math.round(p) - 1 + row)]));
+  }
+  function winsAt(positions) {
+    const board = boardAt(positions), wins = [];
+    C.lines.forEach((line, index) => {
+      const a = line.map((row, r) => board[r][row]);
+      if (a[0] !== 'STAR' && a[0] === a[1] && a[1] === a[2]) wins.push({ role: a[0], line: index });
+    });
+    return wins;
+  }
+  function lineCoordinates(line) {
+    return {x1:0,y1:(line[0]+.5)*100-(line[1]-line[0])*50,
+      x2:300,y2:(line[2]+.5)*100+(line[2]-line[1])*50};
+  }
+  let cache, bonusSafety;
+  function boards() {
+    if (cache) return cache;
+    cache = {};
+    ['MISS', ...ROLES].forEach(role => { cache[role] = []; });
+    for (let a = 0; a < 24; a++) for (let b = 0; b < 24; b++) for (let c = 0; c < 24; c++) {
+      const pos = [a,b,c], wins = winsAt(pos);
+      let mask = 0; wins.forEach(w => { mask |= bit(w.role); });
+      const entry = { pos, wins, mask };
+      if (!mask) Object.keys(cache).forEach(role => cache[role].push(entry));
+      else ROLES.forEach(role => { if (mask === bit(role)) cache[role].push(entry); });
+    }
+    return cache;
+  }
+  function random() {
+    try {
+      const a = new Uint32Array(1); root.crypto.getRandomValues(a); return a[0] / 4294967296;
+    } catch (_) { return Math.random(); }
+  }
+  function bonusSafe(positions) {
+    if (!bonusSafety) {
+      const pure = boards().GRAPE.filter(b => b.wins.some(w => w.line === 1));
+      const grapes = C.strips.map((strip,r) => Array.from({length:24},(_,p)=>p).filter(p=>boardAt([p,p,p])[r][1]==='GRAPE'));
+      const windows = Array.from({length:24},(_,start)=>Array.from({length:C.bonusMaxTravel},(_,d)=>mod(start+d+1)));
+      const pairs = [0,1,2].map(last => {
+        const others = [0,1,2].filter(r=>r!==last), safe = new Set();
+        for(const a of grapes[others[0]]) for(const b of grapes[others[1]]) {
+          const entries=pure.filter(e=>e.pos[others[0]]===a&&e.pos[others[1]]===b);
+          if(windows.every(w=>w.some(p=>entries.some(e=>e.pos[last]===p)))) safe.add(a*24+b);
+        }
+        return safe;
+      });
+      const singles = [0,1,2].map(first => new Set(grapes[first].filter(p=>
+        [0,1,2].filter(r=>r!==first).every(second=>windows.every(w=>w.some(q=>{
+          const last=3-first-second,others=[0,1,2].filter(r=>r!==last), ps=[0,0,0];ps[first]=p;ps[second]=q;
+          return pairs[last].has(ps[others[0]]*24+ps[others[1]]);
+        }))))));
+      bonusSafety={pairs,singles};
+    }
+    const stopped=positions.map((p,r)=>p===null?null:r).filter(r=>r!==null);
+    if(stopped.length===1)return bonusSafety.singles[stopped[0]].has(mod(positions[stopped[0]]));
+    if(stopped.length===2){const last=[0,1,2].find(r=>!stopped.includes(r));return bonusSafety.pairs[last].has(mod(positions[stopped[0]])*24+mod(positions[stopped[1]]));}
+    return true;
+  }
+  function freshStats() {
+    return { total: 0, normal: 0, sinceBonus: 0, big: 0, reg: 0, paid: 0, wagered: 0, replay: 0, missedBonus: 0 };
+  }
+  class Game {
+    constructor(options = {}) {
+      this.rng = options.rng || random;
+      this.events = []; this.time = 0; this.setting = 1; this.credits = C.initialMedals;
+      this.slip = C.maxSlip; this.speed = C.speed; this.phase = 'BET'; this.mode = 'NORMAL';
+      this.betCount = 0; this.betSource = null; this.lastPayout = 0; this.stats = freshStats();
+      this.pending = null; this.lamp = false; this.notice = null; this.role = 'MISS'; this.forced = null;
+      this.bonus = null; this.lastBonus = null; this.deadline = null; this.pay = null;
+      this.wins = []; this.history = []; this.paused = false; this.message = C.bet + '枚BETで、はじめよう。';
+      this.reels = [0,1,2].map((_, r) => ({ p: [4,11,20][r], running: false, stopping: null, target: null }));
+      boards();
+    }
+    emit(type, data = {}) { this.events.push({ type, ...data }); }
+    drainEvents() { return this.events.splice(0); }
+    canChange() { return !this.paused && this.mode === 'NORMAL' && !this.pending && this.phase === 'BET'; }
+    bet() {
+      if (this.paused || this.phase !== 'BET' || this.credits < C.bet) return false;
+      this.credits -= C.bet; this.betCount = C.bet; this.betSource = 'paid'; this.stats.wagered += C.bet;
+      if (this.bonus) this.bonus.net -= C.bet;
+      this.phase = 'LEVER'; this.lastPayout = 0; this.wins = [];
+      this.message = 'レバーでスタート。'; this.emit('bet'); return true;
+    }
+    draw(includeBonus) {
+      const odds = C.settings[this.setting - 1], n = this.rng(); let threshold = 0;
+      for (const role of ROLES) {
+        if (!includeBonus && (role === 'BIG' || role === 'REG')) continue;
+        threshold += 1 / odds[role]; if (n < threshold) return role;
+      }
+      return 'MISS';
+    }
+    lever() {
+      if (this.paused || this.phase !== 'LEVER' || this.betCount !== C.bet) return false;
+      this.betCount = 0; this.phase = 'SPIN'; this.lastPayout = 0; this.wins = []; this.pay = null;
+      this.stats.total++;
+      if (this.mode === 'BONUS') this.role = 'GRAPE';
+      else {
+        this.stats.normal++; this.stats.sinceBonus++;
+        let drawn = this.forced ? this.forced.role : this.draw(!this.pending);
+        // A dev bonus override cannot create a second pending bonus either.
+        if (this.pending && (drawn === 'BIG' || drawn === 'REG')) drawn = 'MISS';
+        if (!this.pending && (drawn === 'BIG' || drawn === 'REG')) {
+          this.pending = drawn;
+          this.notice = this.forced && this.forced.notice !== 'AUTO' ? this.forced.notice :
+            (this.rng() < C.announcementBeforeChance ? 'BEFORE' : 'AFTER');
+          this.lamp = this.notice === 'BEFORE';
+          if (this.lamp) this.emit('notice');
+        }
+        // Small prizes / replay take priority. A miss permits the held bonus to be aimed.
+        this.role = drawn === 'MISS' && this.pending ? this.pending : drawn;
+      }
+      this.forced = null;
+      this.reels.forEach(reel => {
+        // Reducing a full strip is visually identical; all subsequent motion remains forward.
+        reel.p = mod(reel.p); reel.startP = reel.p; reel.startTime = this.time;
+        reel.running = true; reel.stopping = null; reel.target = null;
+      });
+      this.message = this.mode === 'BONUS' ? 'どのタイミングでも、ぶどうが揃います。' :
+        (this.lamp ? 'ランプ点灯！ 7 または BAR を全リールで狙おう。' : '好きな順番で、リールを止めよう。');
+      this.emit('lever'); return true;
+    }
+    position(reel, time = this.time) {
+      if (!reel.running) return reel.p;
+      const s = reel.stopping;
+      if (!s) return reel.startP + (time - reel.startTime) * this.speed;
+      const t = Math.max(0, time - s.at);
+      if (t >= s.duration) return s.target;
+      if (t <= s.cruise) return s.from + this.speed * t;
+      const u = t - s.cruise;
+      return s.from + this.speed * s.cruise + this.speed * u - this.speed * u * u / (2 * s.brake);
+    }
+    optionsFor(index, limit = this.slip) {
+      const p = this.position(this.reels[index]);
+      const first = Math.floor(p + 1e-8) + 1;
+      const last = Math.floor(p + limit + 1e-8);
+      const choices = [];
+      for (let t = first; t <= last; t++) choices.push(t);
+      return choices;
+    }
+    eligibleBoards() {
+      let entries = boards()[this.role];
+      if (this.mode === 'BONUS') entries = entries.filter(b => b.wins.some(w => w.line === 1));
+      return entries.filter(b => this.reels.every((r, i) => r.target === null || b.pos[i] === mod(r.target)));
+    }
+    chooseStop(index) {
+      // In a bonus, automatic grape centring is intentional and independent of button timing.
+      const candidates = this.optionsFor(index, this.mode === 'BONUS' ? C.bonusMaxTravel : this.slip);
+      const legal = this.eligibleBoards(); let best = null;
+      for (const target of candidates) {
+        if (this.mode === 'BONUS') {
+          const committed=this.reels.map(r=>r.target);committed[index]=target;
+          if(!bonusSafe(committed))continue;
+        }
+        const choices = legal.filter(b => b.pos[index] === mod(target));
+        if (!choices.length) continue;
+        const winning = choices.filter(b => b.wins.some(w => w.role === this.role));
+        if (this.mode === 'BONUS' && !winning.length) continue;
+        // A target is desirable only if each already-pressed reel can still share a real line.
+        const lines = new Set(winning.flatMap(b => b.wins.filter(w => w.role === this.role).map(w => w.line)));
+        const rank = (winning.length ? 100 : 0) + lines.size;
+        if (!best || rank > best.rank) best = { target, rank, possibleLines: [...lines] };
+        if (this.mode === 'BONUS' && best) break;
+      }
+      // The shipped strips guarantee a legal result in every 3-cell candidate window.
+      if (!best) throw new Error('No legal stop: configuration violates reel-control invariants.');
+      return best;
+    }
+    stop(index) {
+      const reel = this.reels[index];
+      if (this.paused || this.phase !== 'SPIN' || !reel || !reel.running || reel.stopping) return false;
+      const choice = this.chooseStop(index), from = this.position(reel), distance = choice.target - from;
+      const brake = Math.min(C.brakeSeconds, 2 * distance / this.speed);
+      const cruise = Math.max(0, (distance - this.speed * brake / 2) / this.speed);
+      reel.p = from; reel.target = choice.target;
+      reel.stopping = { at: this.time, from, target: choice.target, brake, cruise, duration: brake + cruise,
+        distance, possibleLines: choice.possibleLines };
+      this.emit('stop', { index }); return true;
+    }
+    advance(seconds) {
+      if (this.paused || !Number.isFinite(seconds) || seconds < 0) return;
+      this.time += seconds;
+      this.reels.forEach(reel => {
+        if (!reel.running) return;
+        reel.p = this.position(reel);
+        if (reel.stopping && this.time >= reel.stopping.at + reel.stopping.duration) {
+          reel.p = reel.target; reel.running = false;
+        }
+      });
+      if (this.phase === 'SPIN' && this.reels.every(r => r.target !== null && !r.running)) {
+        const settledAt = Math.max(...this.reels.map(r => r.stopping.at + r.stopping.duration));
+        this.resolve(settledAt);
+      }
+      if (this.phase === 'PAY') {
+        const due = Math.min(this.pay.amount, Math.max(0, Math.floor((this.time - this.pay.at) / C.coinSeconds + 1e-8)));
+        const delta = due - this.pay.delivered;
+        if (delta > 0) {
+          this.credits += delta; this.stats.paid += delta; this.lastPayout += delta;
+          if (this.bonus) this.bonus.net += delta;
+          this.pay.delivered = due; this.emit('coins', { count: delta });
+        }
+        if (due === this.pay.amount) this.finishGame(this.pay.at + this.pay.amount * C.coinSeconds);
+      }
+      if (this.phase === 'BONUS_INTRO' && this.lamp && this.time >= this.deadline-C.bonusIntroSeconds+C.noticeFlashSeconds) {
+        this.lamp=false; this.emit('lampOff');
+      }
+      if (this.phase === 'BONUS_INTRO' && this.time >= this.deadline) {
+        this.phase = 'BET'; this.lamp=false; this.message = 'ボーナス中！ BET → レバー → 3リール停止。'; this.emit('ready');
+      }
+      if (this.phase === 'BONUS_OUTRO' && this.time >= this.deadline) {
+        this.mode = 'NORMAL'; this.bonus = null; this.phase = 'BET'; this.stats.sinceBonus = 0;
+        this.message = 'ボーナス終了。次の光を待とう。'; this.emit('bonusEnd');
+      }
+    }
+    resolve(at) {
+      this.wins = winsAt(this.reels.map(r => r.p));
+      if (this.wins.some(w => w.role !== this.role)) throw new Error('Unauthorised visible prize');
+      const justAnnounced = !!this.pending && !this.lamp;
+      if (justAnnounced) { this.lamp = true; this.emit('notice'); }
+      const won = this.wins.length > 0;
+      if (won && (this.role === 'BIG' || this.role === 'REG')) {
+        if (this.pending !== this.role) throw new Error('Bonus without pending internal award');
+        const type = this.pending; this.pending = null; this.lamp = justAnnounced; this.notice = null;
+        this.mode = 'BONUS'; this.bonus = { type, total: C.bonus[type].games, remaining: C.bonus[type].games, net: 0 };
+        this.stats[type === 'BIG' ? 'big' : 'reg']++;
+        this.phase = 'BONUS_INTRO'; this.deadline = at + C.bonusIntroSeconds;
+        this.message = type + ' BONUS！ ' + C.bonus[type].games + 'G スタート。';
+        this.record(type); this.emit('bonusStart', { bonusType: type }); return;
+      }
+      if (won && this.role === 'REPLAY') {
+        this.stats.replay++; this.phase = 'LEVER'; this.betCount = C.bet; this.betSource = 'replay';
+        this.message = 'REPLAY — メダルを使わず、そのままレバー。'; this.record('REPLAY'); this.emit('replay'); return;
+      }
+      const amount = won ? C.payouts[this.role] : 0;
+      if (this.pending && this.role === this.pending && !won) this.stats.missedBonus++;
+      this.record(won ? this.role : 'MISS');
+      if (amount > 0) { this.phase = 'PAY'; this.pay = { at, amount, delivered: 0 }; this.message = C.labels[this.role] + '！ +' + amount + '枚'; }
+      else this.finishGame(at);
+    }
+    record(result) {
+      this.history.unshift({ game: this.stats.total, result }); this.history.length = Math.min(10, this.history.length);
+    }
+    finishGame(at) {
+      this.pay = null; this.betCount = 0; this.betSource = null;
+      if (this.mode === 'BONUS') {
+        this.bonus.remaining--;
+        if (this.bonus.remaining === 0) {
+          this.lastBonus = clone(this.bonus); this.phase = 'BONUS_OUTRO'; this.deadline = at + C.bonusOutroSeconds;
+          this.message = this.bonus.type + ' COMPLETE！ 純増 +' + this.bonus.net + '枚'; this.emit('bonusComplete'); return;
+        }
+        this.message = 'ぶどう +' + C.payouts.GRAPE + '枚。あと ' + this.bonus.remaining + 'G。';
+      } else if (this.pending) this.message = '当選は持ち越し。ランプは点灯したままです。';
+      else if (!this.wins.length) this.message = '次のゲームへ。';
+      this.phase = 'BET'; this.emit('ready');
+    }
+    pause() { if (!this.paused) { this.paused = true; this.emit('pause'); } }
+    resume() { if (this.paused) { this.paused = false; this.emit('resume'); } }
+    refill() {
+      if (this.paused || this.phase !== 'BET' || this.credits >= C.bet) return false;
+      this.credits += C.initialMedals; this.message = '仮想メダルを ' + C.initialMedals + '枚補充しました。'; this.emit('refill'); return true;
+    }
+    setSetting(setting) {
+      if (!this.canChange() || !Number.isInteger(setting) || setting < 1 || setting > 6) return false;
+      this.setting = setting; this.credits = C.initialMedals; this.stats = freshStats(); this.history = [];
+      this.lastPayout = 0; this.lastBonus = null; this.wins = []; this.role = 'MISS'; this.forced = null;
+      this.message = '設定' + setting + 'で開始。メダルと遊技データをリセットしました。'; this.emit('setting'); return true;
+    }
+    setControls(slip, speed) {
+      if (this.paused || this.phase !== 'BET' || this.mode === 'BONUS') return false;
+      if (Number.isInteger(slip) && slip >= C.slipMin && slip <= C.slipMax) this.slip = slip;
+      if (Number.isFinite(speed) && speed >= 10 && speed <= 16) this.speed = speed;
+      this.emit('controls'); return true;
+    }
+    devForce(role, notice = 'AUTO') {
+      if (!['MISS', ...ROLES].includes(role) || !['AUTO','BEFORE','AFTER'].includes(notice)) return false;
+      this.forced = { role, notice }; return true;
+    }
+    devPosition(index, p) {
+      const reel = this.reels[index];
+      if (!Number.isFinite(p) || this.phase !== 'SPIN' || !reel || !reel.running || reel.stopping) return false;
+      reel.p = p; reel.startP = p; reel.startTime = this.time; return true;
+    }
+    exportState() {
+      const fields = ['time','setting','credits','slip','speed','phase','mode','betCount','betSource','lastPayout','stats','pending','lamp','notice','role','bonus','lastBonus','deadline','pay','wins','history','reels','message'];
+      const state = { version: C.version }; fields.forEach(k => { state[k] = clone(this[k]); }); return state;
+    }
+    restore(state) {
+      if (!state || state.version !== C.version) return false;
+      if (!Object.keys(this.exportState()).every(k => Object.prototype.hasOwnProperty.call(state,k))) return false;
+      const phases = ['BET','LEVER','SPIN','PAY','BONUS_INTRO','BONUS_OUTRO'];
+      if (!phases.includes(state.phase) || !['NORMAL','BONUS'].includes(state.mode) ||
+          !Number.isInteger(state.credits) || state.credits < 0 || state.credits > 1e10 ||
+          !Number.isInteger(state.setting) || state.setting < 1 || state.setting > 6 ||
+          !Number.isInteger(state.slip) || state.slip < C.slipMin || state.slip > C.slipMax ||
+          !Number.isFinite(state.speed) || state.speed < 10 || state.speed > 16 ||
+          !Number.isFinite(state.time) || state.time < 0 || !Array.isArray(state.reels) || state.reels.length !== 3 ||
+          !state.reels.every(r => Number.isFinite(r.p) && typeof r.running === 'boolean' && (r.target === null || Number.isFinite(r.target))) ||
+          !state.stats || !Object.keys(freshStats()).every(k => Number.isInteger(state.stats[k]) && state.stats[k] >= 0) ||
+          ![null,'BIG','REG'].includes(state.pending) || !['MISS',...ROLES].includes(state.role) ||
+          !Array.isArray(state.history) || state.history.length > 10 || !Array.isArray(state.wins) ||
+          !state.wins.every(w=>ROLES.includes(w.role)&&Number.isInteger(w.line)&&w.line>=0&&w.line<5) ||
+          typeof state.lamp !== 'boolean' || ![0,C.bet].includes(state.betCount) || typeof state.message !== 'string') return false;
+      if (state.mode === 'BONUS' && (!state.bonus || !['BIG','REG'].includes(state.bonus.type) ||
+          !Number.isInteger(state.bonus.remaining) || state.bonus.remaining < 0 || state.bonus.remaining > C.bonus[state.bonus.type].games ||
+          !Number.isFinite(state.bonus.net))) return false;
+      if (state.phase === 'PAY' && (!state.pay || !Number.isInteger(state.pay.amount) ||
+          state.pay.amount < 0 || !Number.isInteger(state.pay.delivered) || state.pay.delivered < 0 || state.pay.delivered > state.pay.amount || !Number.isFinite(state.pay.at))) return false;
+      if (state.phase === 'LEVER' && state.betCount !== C.bet) return false;
+      if (state.reels.some(r => r.running && (!Number.isFinite(r.startP) || !Number.isFinite(r.startTime))) ||
+          state.reels.some(r => r.stopping && !['at','from','target','brake','cruise','duration','distance'].every(k => Number.isFinite(r.stopping[k])))) return false;
+      const fields = Object.keys(this.exportState()).filter(k => k !== 'version');
+      fields.forEach(k => { this[k] = clone(state[k]); }); this.forced = null; this.events = [];
+      this.paused = ['SPIN','PAY','BONUS_INTRO','BONUS_OUTRO'].includes(this.phase); return true;
+    }
+    snapshot() {
+      return { ...this.exportState(), paused: this.paused, forced: clone(this.forced), visible: boardAt(this.reels.map(r => r.p)),
+        positions: this.reels.map(r => this.position(r)) };
+    }
+  }
+  const api = { Game, boardAt, winsAt, lineCoordinates, boards, mod, ROLES };
+  root.LumiEngine = api;
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+</script>
+  <script>/* Original synthesised effects and melody. No downloaded audio or CDN. */
+(function (root) {
+  'use strict';
+  class Audio {
+    constructor() {
+      this.ctx = null; this.master = null; this.volume = 0.4; this.muted = false;
+      this.voices = new Set(); this.bgm = false; this.nextNote = 0; this.step = 0; this.hold = false;
+    }
+    unlock() {
+      try {
+        if (!this.ctx || this.ctx.state === 'closed') {
+          const A = root.AudioContext || root.webkitAudioContext;
+          if (!A) return;
+          this.ctx = new A(); this.master = this.ctx.createGain(); this.master.connect(this.ctx.destination);
+          this.setVolume(this.volume); this.nextNote = this.ctx.currentTime;
+        }
+        if (this.ctx.state !== 'running') this.ctx.resume().catch(() => {});
+        // A silent, short source is also started within the trusted gesture.
+        const buffer = this.ctx.createBuffer(1, 1, this.ctx.sampleRate);
+        const source = this.ctx.createBufferSource(); source.buffer = buffer;
+        source.connect(this.master); source.start();
+        this.hold = false;
+      } catch (_) { /* Sound failure never stops play. */ }
+    }
+    setVolume(v) {
+      this.volume = Math.max(0, Math.min(1, Number(v) || 0));
+      if (this.master) this.master.gain.setValueAtTime(this.muted ? 0 : this.volume * 0.35, this.ctx.currentTime);
+    }
+    setMuted(muted) { this.muted = !!muted; this.setVolume(this.volume); }
+    tone(freq, duration = 0.09, offset = 0, type = 'sine', loudness = 0.45, endFreq = null) {
+      if (!this.ctx || this.hold || this.muted) return;
+      try {
+        const at = this.ctx.currentTime + offset, o = this.ctx.createOscillator(), g = this.ctx.createGain();
+        o.type = type; o.frequency.setValueAtTime(freq, at);
+        if (endFreq) o.frequency.exponentialRampToValueAtTime(endFreq, at + duration);
+        g.gain.setValueAtTime(0.0001, at); g.gain.linearRampToValueAtTime(loudness, at + Math.min(.012, duration / 3));
+        g.gain.exponentialRampToValueAtTime(0.0001, at + duration);
+        o.connect(g); g.connect(this.master); this.voices.add(o);
+        o.onended = () => { this.voices.delete(o); o.disconnect(); g.disconnect(); };
+        o.start(at); o.stop(at + duration + .015);
+      } catch (_) {}
+    }
+    effect(name, value) {
+      switch (name) {
+        case 'bet': this.tone(740,.05,0,'triangle'); this.tone(990,.08,.045,'triangle'); break;
+        case 'lever': this.tone(190,.12,0,'triangle',.7,62); this.tone(580,.045,.015,'sine',.25); break;
+        case 'stop': this.tone([440,554,659][value || 0],.065,0,'triangle',.5,210); break;
+        case 'coins': this.tone(1350,.025,0,'sine',.28); break;
+        case 'notice': [784,1047,1568].forEach((n,i) => this.tone(n,.26,i*.055,'sine',.45)); break;
+        case 'replay': [659,880,659].forEach((n,i) => this.tone(n,.12,i*.1,'triangle',.35)); break;
+        case 'fanfare': [523,659,784,1047,988,1175,1568].forEach((n,i) => this.tone(n,i===6?.55:.19,i*.13,'triangle',.6)); break;
+        case 'complete': [1047,784,659,523].forEach((n,i) => this.tone(n,.3,i*.16,'triangle',.5)); break;
+      }
+    }
+    startBgm(delay = 0) {
+      this.bgm = true; this.step = 0; this.nextNote = (this.ctx ? this.ctx.currentTime : 0) + delay;
+    }
+    stopBgm() { this.bgm = false; }
+    pump() {
+      if (!this.ctx || this.ctx.state !== 'running' || this.hold || !this.bgm || this.muted) return;
+      const now = this.ctx.currentTime;
+      if (this.nextNote < now - .2) this.nextNote = now;
+      const melody = [76,0,79,81,79,76,72,74,76,0,83,81,79,74,76,72,69,72,76,79,77,76,74,72,71,74,79,83,81,79,76,74];
+      const bass = [48,48,53,53,57,57,55,55];
+      while (this.nextNote < now + .09) {
+        const offset = Math.max(0,this.nextNote - now), note = melody[this.step % melody.length];
+        if (note) this.tone(440 * Math.pow(2,(note-69)/12),.13,offset,'triangle',.18);
+        if (this.step % 4 === 0) this.tone(440 * Math.pow(2,(bass[Math.floor(this.step/4)%8]-69)/12),.28,offset,'sine',.3);
+        if (this.step % 2 === 1) this.tone(2200,.02,offset,'sine',.06);
+        this.step++; this.nextNote += .16;
+      }
+    }
+    suspend() {
+      this.hold = true;
+      this.voices.forEach(o => { try { o.stop(); } catch (_) {} }); this.voices.clear();
+      if (this.ctx && this.ctx.state !== 'closed') this.ctx.suspend().catch(() => {});
+    }
+    resume() { this.unlock(); this.nextNote = this.ctx ? this.ctx.currentTime : 0; }
+  }
+  root.LumiAudio = Audio;
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+</script>
+  <script>window.LUMI_ART = {"BELL": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"120\" viewBox=\"0 0 160 120\"><defs><linearGradient id=\"b\"><stop stop-color=\"#d18d19\"/><stop offset=\".4\" stop-color=\"#fff08a\"/><stop offset=\".7\" stop-color=\"#f6c543\"/><stop offset=\"1\" stop-color=\"#bd811d\"/></linearGradient></defs><circle cx=\"80\" cy=\"97\" r=\"10\" fill=\"#b97920\"/><path d=\"M41 86q13-11 14-38 2-25 25-25t25 25q1 27 14 38z\" fill=\"url(#b)\" stroke=\"#ab771d\" stroke-width=\"3\"/><ellipse cx=\"80\" cy=\"87\" rx=\"41\" ry=\"9\" fill=\"#f6d15a\" stroke=\"#b78023\" stroke-width=\"3\"/><circle cx=\"80\" cy=\"20\" r=\"7\" fill=\"#ffe886\" stroke=\"#b78023\" stroke-width=\"2\"/><path d=\"M68 37q-6 9-6 28\" fill=\"none\" stroke=\"#fff6c2\" stroke-width=\"5\" stroke-linecap=\"round\"/><path d=\"m121 26 3 8 8 3-8 3-3 8-3-8-8-3 8-3z\" fill=\"#e4b645\"/></svg>", "BIG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"120\" viewBox=\"0 0 160 120\"><defs><linearGradient id=\"s\" x2=\"0\" y2=\"1\"><stop stop-color=\"#ff628b\"/><stop offset=\".5\" stop-color=\"#f62752\"/><stop offset=\"1\" stop-color=\"#ae1237\"/></linearGradient></defs><path d=\"M43 26h80v18L83 103H48l41-55H39z\" fill=\"#74203a\" transform=\"translate(0 4)\"/><path d=\"M43 22h80v18L83 99H48l41-55H39z\" fill=\"url(#s)\" stroke=\"#671b37\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"M48 28h68M48 32h54\" fill=\"none\" stroke=\"#ffb4c8\" stroke-width=\"3\" stroke-linecap=\"round\"/><path d=\"m110 56 4 5 7 1-6 5-1 7-4-6-7-2 6-4z\" fill=\"#ffe782\"/></svg>", "CHERRY": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"120\" viewBox=\"0 0 160 120\"><defs><radialGradient id=\"c\" cx=\".3\" cy=\".25\" r=\".8\"><stop stop-color=\"#ff9ba2\"/><stop offset=\".38\" stop-color=\"#ed4055\"/><stop offset=\"1\" stop-color=\"#a41542\"/></radialGradient></defs><path d=\"M55 70Q60 25 101 14Q87 37 102 75\" fill=\"none\" stroke=\"#4d884b\" stroke-width=\"5\" stroke-linecap=\"round\"/><path d=\"M86 24Q56 25 67 7q23 0 19 17\" fill=\"#71b752\"/><circle cx=\"55\" cy=\"84\" r=\"23\" fill=\"url(#c)\" stroke=\"#971c40\" stroke-width=\"2\"/><circle cx=\"104\" cy=\"86\" r=\"22\" fill=\"url(#c)\" stroke=\"#971c40\" stroke-width=\"2\"/><ellipse cx=\"48\" cy=\"75\" rx=\"7\" ry=\"4\" fill=\"#ffdcdf\" opacity=\".8\"/><ellipse cx=\"99\" cy=\"77\" rx=\"6\" ry=\"4\" fill=\"#ffdcdf\" opacity=\".8\"/></svg>", "GRAPE": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"120\" viewBox=\"0 0 160 120\"><defs><radialGradient id=\"g\" cx=\".3\" cy=\".2\" r=\".9\"><stop stop-color=\"#c3a6ff\"/><stop offset=\".4\" stop-color=\"#8354de\"/><stop offset=\"1\" stop-color=\"#472393\"/></radialGradient></defs><path d=\"M79 32q0-23 19-23\" fill=\"none\" stroke=\"#467d43\" stroke-width=\"5\" stroke-linecap=\"round\"/><path d=\"M81 30Q49 27 49 8q28-5 32 22\" fill=\"#68b858\" stroke=\"#357343\" stroke-width=\"2\"/><g fill=\"url(#g)\" stroke=\"#4d2c8b\" stroke-width=\"2\"><circle cx=\"59\" cy=\"45\" r=\"15\"/><circle cx=\"87\" cy=\"43\" r=\"15\"/><circle cx=\"105\" cy=\"65\" r=\"15\"/><circle cx=\"48\" cy=\"68\" r=\"15\"/><circle cx=\"76\" cy=\"66\" r=\"17\"/><circle cx=\"61\" cy=\"89\" r=\"15\"/><circle cx=\"90\" cy=\"87\" r=\"15\"/><circle cx=\"76\" cy=\"106\" r=\"11\"/></g><g fill=\"#f4e8ff\" opacity=\".7\"><ellipse cx=\"54\" cy=\"40\" rx=\"5\" ry=\"3\"/><ellipse cx=\"72\" cy=\"59\" rx=\"6\" ry=\"4\"/><ellipse cx=\"87\" cy=\"81\" rx=\"5\" ry=\"3\"/></g></svg>", "REG": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"120\" viewBox=\"0 0 160 120\"><rect x=\"23\" y=\"30\" width=\"114\" height=\"64\" rx=\"14\" fill=\"#34344a\"/><rect x=\"27\" y=\"26\" width=\"106\" height=\"62\" rx=\"12\" fill=\"#171b31\" stroke=\"#757797\" stroke-width=\"3\"/><path d=\"M34 37h92M34 79h92\" stroke=\"#c7bd89\" stroke-width=\"2\"/><text x=\"80\" y=\"68\" text-anchor=\"middle\" font-family=\"Arial,sans-serif\" font-size=\"34\" font-weight=\"900\" letter-spacing=\"2\" fill=\"#fff3d0\">BAR</text></svg>", "REPLAY": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"120\" viewBox=\"0 0 160 120\"><circle cx=\"80\" cy=\"60\" r=\"36\" fill=\"#e3fcf6\" stroke=\"#208f85\" stroke-width=\"3\"/><path d=\"M55 44q20-23 43-3l6 5m-1-15 1 16-16-1M104 76q-20 23-43 3l-6-5m1 15-1-16 16 1\" fill=\"none\" stroke=\"#25ad9b\" stroke-width=\"6\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/><text x=\"80\" y=\"70\" text-anchor=\"middle\" font-family=\"Arial,sans-serif\" font-size=\"27\" font-weight=\"900\" fill=\"#157e77\">R</text></svg>", "STAR": "<svg xmlns=\"http://www.w3.org/2000/svg\" width=\"160\" height=\"120\" viewBox=\"0 0 160 120\"><path d=\"m80 18 12 28 31 3-24 21 7 31-26-16-26 16 7-31-24-21 31-3z\" fill=\"#b8c9dc\" stroke=\"#859ab5\" stroke-width=\"3\" stroke-linejoin=\"round\"/><path d=\"m80 26 8 24 27 3-23 7-12 24z\" fill=\"#e6edf6\"/><path d=\"m122 15 3 7 7 3-7 3-3 7-3-7-7-3 7-3z\" fill=\"#a3b9d0\"/></svg>"};</script>
+  <script>/* Same real-engine tests run in Node and in the browser's hidden development panel. */
+(function (root) {
+  'use strict';
+  function run() {
+    const C=root.LUMI_CONFIG,E=root.LumiEngine,Game=E.Game;
+    let assertions=0,cases=0,maxBonusTravel=0;const tests=[];
+    const assert=(ok,message)=>{assertions++;if(!ok)throw new Error(message);};
+    const equal=(a,b,message)=>assert(JSON.stringify(a)===JSON.stringify(b),message+' | '+JSON.stringify(a)+' != '+JSON.stringify(b));
+    const near=(a,b,message)=>assert(Math.abs(a-b)<1e-7,message);
+    const orders=[[0,1,2],[0,2,1],[1,0,2],[1,2,0],[2,0,1],[2,1,0]];
+    let seed=20519;const rng=()=>((seed=(Math.imul(seed,1664525)+1013904223)>>>0)/4294967296);
+    function test(name,fn){fn();tests.push({name,status:'PASS'});}
+    function newSpin(role,notice='BEFORE') {const g=new Game({rng:()=>.9});g.devForce(role,notice);assert(g.bet(),'BET');assert(g.lever(),'LEVER');return g;}
+    function aim(g,index) {
+      const winner=g.eligibleBoards().find(b=>b.wins.some(w=>w.role===g.role));
+      if(winner)g.devPosition(index,winner.pos[index]-1.4);else g.devPosition(index,.35);
+      assert(g.stop(index),'aim stop');
+    }
+    function miss(g,index) {
+      for(let p=0;p<24;p++) {
+        g.devPosition(index,p+.37);
+        if(g.chooseStop(index).rank<100){assert(g.stop(index),'miss stop');return;}
+      }
+      throw new Error('No miss window');
+    }
+    function complete(g,order,aimed=true) {
+      order.forEach(i=>{if(aimed)aim(g,i);else{g.advance(rng()*.27);assert(g.stop(i),'free timing stop');maxBonusTravel=Math.max(maxBonusTravel,g.reels[i].stopping.distance);}g.advance(.02);});
+      g.advance(3);
+    }
+    test('BET不足・連打・単独停止・レバー抽選は1回',()=>{
+      let calls=0;const g=new Game({rng:()=>{calls++;return .99;}});
+      assert(!g.lever(),'no wager cannot spin');g.credits=2;assert(!g.bet(),'not enough medals');g.credits=1000;
+      assert(g.bet(),'bet once');equal(g.credits,997,'bet consumes 3');assert(!g.bet(),'double bet blocked');assert(g.lever(),'lever once');equal(calls,1,'one draw');
+      for(let i=0;i<30;i++){assert(!g.bet(),'spin bet blocked');assert(!g.lever(),'spin lever blocked');}
+      assert(g.stop(1),'centre accepted');assert(!g.stop(1),'double stop blocked');assert(g.reels[0].running&&g.reels[2].running,'other reels still running');equal(calls,1,'stops do not redraw');
+      g.advance(.7);assert(!g.reels[1].running,'centre stopped');assert(g.reels[0].running&&g.reels[2].running,'other reels keep spinning');g.stop(2);g.stop(0);g.advance(2);equal(g.phase,'BET','normal game ends');cases++;
+    });
+    test('BIG・REG目押し成功：全6停止順と全設定',()=>{
+      ['BIG','REG'].forEach(role=>orders.forEach(order=>{for(let setting=1;setting<=6;setting++){
+        const g=new Game({rng:()=>.9});g.setSetting(setting);g.devForce(role,'BEFORE');g.bet();g.lever();assert(g.lamp,'pre-notice lamp on');complete(g,order);
+        equal(g.mode,'BONUS','bonus starts');equal(g.bonus.type,role,'correct bonus');equal(g.bonus.remaining,C.bonus[role].games,'initial games');equal(g.credits,997,'no lump-sum award');equal(g.stats[role==='BIG'?'big':'reg'],1,'one bonus');cases++;
+      }}));
+    });
+    test('全3リールそれぞれの取りこぼし・持ち越し：全6停止順',()=>{
+      ['BIG','REG'].forEach(role=>orders.forEach(order=>[0,1,2].forEach(missed=>{
+        const g=newSpin(role);
+        order.forEach(i=>{i===missed?miss(g,i):aim(g,i);g.advance(.02);});g.advance(2);
+        equal(g.mode,'NORMAL','single reel miss prevents bonus');equal(g.pending,role,'award carried');assert(g.lamp,'lamp carried');equal(g.stats.missedBonus,1,'miss counted');equal(g.credits,997,'miss gives no award');
+        g.devForce('MISS');g.bet();g.lever();equal(g.role,role,'held bonus remains target');complete(g,order);equal(g.mode,'BONUS','next aimed spin begins bonus');equal(g.credits,994,'next bet only');cases++;
+      })));
+    });
+    test('先告知・後告知・重複当選防止・持ち越し中の小役優先',()=>{
+      ['BEFORE','AFTER'].forEach(notice=>{
+        const g=newSpin('BIG',notice);equal(g.lamp,notice==='BEFORE','timing before stops');miss(g,0);aim(g,1);g.advance(.8);equal(g.lamp,notice==='BEFORE','not before third stop');aim(g,2);g.advance(1);assert(g.lamp,'after third lit');equal(g.pending,'BIG','held');cases++;
+      });
+      const g=newSpin('BIG');miss(g,0);aim(g,1);aim(g,2);g.advance(2);
+      g.devForce('REG');g.bet();g.lever();equal(g.pending,'BIG','not duplicated');equal(g.role,'BIG','second bonus force ignored');miss(g,0);aim(g,1);aim(g,2);g.advance(2);
+      g.devForce('GRAPE');g.bet();g.lever();equal(g.role,'GRAPE','small prize priority');complete(g,[2,0,1]);equal(g.pending,'BIG','small prize preserves bonus');assert(g.lamp,'lamp retained');equal(g.lastPayout,8,'small payout');equal(g.mode,'NORMAL','small prize cannot begin bonus');cases++;
+      const postWin=newSpin('BIG','AFTER');[0,1,2].forEach(i=>aim(postWin,i));
+      const settled=Math.max(...postWin.reels.map(r=>r.stopping.at+r.stopping.duration));postWin.advance(settled-postWin.time+1e-6);
+      equal(postWin.mode,'BONUS','post-notice winning spin begins bonus');assert(postWin.lamp,'post-notice success still visibly lights lamp');
+      postWin.advance(C.noticeFlashSeconds/2);assert(postWin.lamp,'notice flash is retained');postWin.advance(C.noticeFlashSeconds/2+.001);assert(!postWin.lamp,'bonus lamp clears after visible flash');cases++;
+    });
+    test('経過時間・滑り上限・速度連続・単調減速・前向き停止',()=>{
+      const a=newSpin('MISS'),b=newSpin('MISS');a.advance(1.5);for(let i=0;i<180;i++)b.advance(1/120);
+      a.reels.forEach((r,i)=>near(r.p,b.reels[i].p,'same position at 120fps'));equal(a.role,b.role,'draw unaffected by frames');
+      for(const slip of [3,4,5,6])for(const fraction of [.001,.1,.3,.6,.999]) {
+        const g=new Game({rng:()=>.99});g.setControls(slip,13.5);g.bet();g.lever();g.devPosition(0,12+fraction);g.stop(0);const s=g.reels[0].stopping;
+        assert(s.distance>0&&s.distance<=slip+1e-8,'bounded forward travel');assert(s.duration<=slip/g.speed+C.brakeSeconds/2+1e-8,'short stop duration');
+        let last=s.from,lastV=g.speed;
+        for(let step=1;step<=120;step++) {
+          const t=s.duration*step/120,p=g.position(g.reels[0],s.at+t),v=(p-last)/(s.duration/120);
+          assert(p>=last-1e-9,'never reverse');assert(v<=g.speed+1e-7,'never accelerate above cruise');assert(v<=lastV+1e-7,'nonincreasing velocity');last=p;lastV=v;
+        }
+        near(last,s.target,'exact continuous landing');
+        const epsilon=Math.min(1e-7,s.brake/100),expected=g.speed*(s.cruise>=epsilon?1:1-epsilon/(2*s.brake));
+        assert(Math.abs((g.position(g.reels[0],s.at+epsilon)-s.from)/epsilon-expected)<1e-5,'button-edge velocity continuous');cases++;
+      }
+    });
+    test('全5ラインの図柄・判定・払い出し、リプレイの無料BET',()=>{
+      // Independent renderer geometry: top / middle / bottom are at y = (p-k+1)*cell.
+      for(let p=0;p<24;p++)for(let r=0;r<3;r++)for(let row=0;row<3;row++){
+        const spriteK=p+1-row,drawn=C.strips[r][E.mod(-spriteK)];
+        equal(E.boardAt([p,p,p])[r][row],drawn,'canvas geometry and judged row agree');
+      }
+      C.lines.forEach(line=>{
+        const path=E.lineCoordinates(line);
+        line.forEach((row,r)=>near(path.y1+(path.y2-path.y1)*(r+.5)/3,(row+.5)*100,'payline passes through actual symbol centre'));
+      });
+      const all=Object.values(E.boards()).flat();
+      for(let line=0;line<5;line++) {
+        const fixture=all.find(b=>b.wins.some(w=>w.role==='BIG'&&w.line===line));assert(!!fixture,'five-line fixture exists');
+        const visual=E.boardAt(fixture.pos);assert(C.lines[line].every((row,r)=>visual[r][row]==='BIG'),'visible 7 matches judged line');equal(E.winsAt(fixture.pos),fixture.wins,'judgement same board');cases++;
+      }
+      ['GRAPE','CHERRY','BELL','REPLAY'].forEach(role=>orders.forEach(order=>{
+        const g=newSpin(role);complete(g,order);assert(g.wins.every(w=>w.role===role),'only internal prize visible');assert(g.wins.length>0,'aimed small prize wins');
+        const visual=E.boardAt(g.reels.map(r=>r.p));g.wins.forEach(w=>assert(C.lines[w.line].every((row,r)=>visual[r][row]===role),'line symbols match payout'));
+        equal(g.lastPayout,C.payouts[role],'right payout');equal(g.credits,997+C.payouts[role],'right medals');
+        if(role==='REPLAY'){equal(g.phase,'LEVER','replay prebet');equal(g.betCount,3,'free bet');assert(!g.bet(),'no second payment');g.devForce('MISS');assert(g.lever(),'replay lever');equal(g.credits,997,'no extra medals spent');}
+        cases++;
+      }));
+    });
+    test('ボーナス全G・全停止順・タイミング不問・最終払い出し先行',()=>{
+      ['BIG','REG'].forEach(role=>orders.forEach(order=>{
+        const g=newSpin(role);complete(g,order);equal(g.phase,'BET','intro finished');const start=g.credits;
+        for(let n=0;n<C.bonus[role].games;n++) {
+          equal(g.bonus.remaining,C.bonus[role].games-n,'remaining before bet');g.bet();g.lever();equal(g.role,'GRAPE','every bonus outcome grape');
+          order.forEach(i=>{g.advance(rng()*.21);assert(g.stop(i),'any timing bonus stop');maxBonusTravel=Math.max(maxBonusTravel,g.reels[i].stopping.distance);assert(g.reels[i].stopping.distance<=C.bonusMaxTravel+1e-8,'bonus stop travel also bounded');g.advance(.01);});
+          const settle=Math.max(...g.reels.map(r=>r.stopping.at+r.stopping.duration));g.advance(Math.max(0,settle-g.time)+1e-6);
+          equal(g.phase,'PAY','payout begins');equal(g.lastPayout,0,'no instant full payout');assert(g.wins.some(w=>w.role==='GRAPE'&&w.line===1),'centre grapes without aim');
+          g.advance(C.coinSeconds*C.payouts.GRAPE-0.0002);equal(g.lastPayout,7,'last medal not delivered yet');equal(g.bonus.remaining,C.bonus[role].games-n,'game not decremented early');
+          g.advance(.0003);equal(g.lastPayout,8,'all eight delivered');equal(g.bonus.remaining,C.bonus[role].games-n-1,'decrement after final coin');cases++;
+        }
+        equal(g.phase,'BONUS_OUTRO','outro after payout');equal(g.bonus.net,C.bonus[role].games*5,'net increments per game');equal(g.credits,start+C.bonus[role].games*5,'net exact');
+        g.advance(1.5);equal(g.mode,'NORMAL','returns normal');equal(g.stats.sinceBonus,0,'since counter resets');equal(g.stats.total,1+C.bonus[role].games,'total games no drift');equal(g.stats.normal,1,'normal count excludes bonus');
+      }));
+    });
+    test('非当選役の見た目成立を排除：全41,472停止窓＋ランダム遊技',()=>{
+      let checked=0;
+      const masks=new Uint8Array(24*24*24);
+      for(let a=0;a<24;a++)for(let b=0;b<24;b++)for(let c=0;c<24;c++)masks[(a*24+b)*24+c]=E.winsAt([a,b,c]).length>0?1:0;
+      for(let last=0;last<3;last++){const others=[0,1,2].filter(i=>i!==last);for(let a=0;a<24;a++)for(let b=0;b<24;b++)for(let first=0;first<24;first++){
+        let legal=false;const p=[0,0,0];p[others[0]]=a;p[others[1]]=b;
+        for(let d=0;d<3;d++){p[last]=(first+d)%24;if(!masks[(p[0]*24+p[1])*24+p[2]])legal=true;}
+        assert(legal,'three-cell legal stop window');checked++;
+      }}equal(checked,41472,'all windows checked');cases+=checked;
+      for(const slip of [3,4,5,6])for(const role of ['MISS',...E.ROLES])for(const order of orders)for(let repeat=0;repeat<3;repeat++) {
+        const g=new Game({rng});g.setControls(slip,13.5);g.devForce(role);g.bet();g.lever();order.forEach(i=>{g.advance(rng()*.35);g.devPosition(i,rng()*24);g.stop(i);g.advance(.02);});g.advance(3);
+        assert(g.wins.every(w=>w.role===role),'no unauthorised visible win');cases++;
+      }
+    });
+    test('設定変更制限・確率表の単調性・メダル補充',()=>{
+      let previous=0;C.settings.forEach((s,i)=>{const combined=1/s.BIG+1/s.REG;assert(combined>previous,'bonus rate rises');previous=combined;const g=new Game();g.stats.total=10;g.credits=25;assert(g.setSetting(i+1),'setting accepted');equal(g.credits,1000,'medals reset');equal(g.stats.total,0,'data reset');g.bet();assert(!g.setSetting(6),'wagered setting locked');g.lever();assert(!g.setSetting(6),'spinning setting locked');cases++;});
+      const g=newSpin('BIG');assert(!g.setSetting(6),'pending locked');complete(g,[0,1,2]);assert(!g.setSetting(6),'bonus locked');
+      const h=new Game();h.credits=1;assert(!h.bet(),'low balance cannot bet');assert(h.refill(),'refill when depleted');equal(h.credits,1001,'refill adds medals');assert(!h.refill(),'refill cannot spam while funded');cases++;
+      const boundaryRole=(setting,includeBonus)=>{const odds=C.settings[setting-1];let edge=0;for(const role of E.ROLES){if(!includeBonus&&['BIG','REG'].includes(role))continue;const g=new Game({rng:()=>edge+1/odds[role]/2});g.setting=setting;equal(g.draw(includeBonus),role,'draw bucket matches table');edge+=1/odds[role];}const g=new Game({rng:()=>edge+(1-edge)/2});g.setting=setting;equal(g.draw(includeBonus),'MISS','remaining probability is miss');};
+      for(let s=1;s<=6;s++){boundaryRole(s,true);boundaryRole(s,false);}
+    });
+    test('アプリ中断・復帰・回転中保存・払い出し途中保存',()=>{
+      const g=newSpin('BIG');aim(g,1);g.advance(.03);const p=g.reels.map(r=>r.p),t=g.time;g.pause();g.advance(100);equal(g.time,t,'paused time frozen');equal(g.reels.map(r=>r.p),p,'paused positions frozen');g.resume();
+      const h=new Game();assert(h.restore(g.exportState()),'spin restored');assert(h.paused,'restored spin waits resume');h.resume();g.advance(.03);h.advance(.03);g.reels.forEach((r,i)=>near(r.p,h.reels[i].p,'same restored position'));aim(h,0);aim(h,2);h.advance(3);equal(h.mode,'BONUS','restored pending bonus works');cases++;
+      h.bet();h.lever();[0,1,2].forEach(i=>h.stop(i));const settle=Math.max(...h.reels.map(r=>r.stopping.at+r.stopping.duration));h.advance(settle-h.time+C.coinSeconds*3+.00001);equal(h.lastPayout,3,'partial payout fixture');
+      const j=new Game();assert(j.restore(h.exportState()),'partial payout restore');const credit=j.credits;j.resume();j.advance(1);equal(j.credits,credit+5,'only remaining five paid');equal(j.bonus.remaining,49,'one game decremented');const after=j.credits;j.advance(5);equal(j.credits,after,'no duplicate payout');cases++;
+      const bad=h.exportState();bad.credits=-1;assert(!new Game().restore(bad),'corrupt save rejected');assert(!new Game().restore({version:1}),'incomplete save rejected');
+    });
+    return {status:'PASS',tests:tests.length,assertions,scenarioCases:cases,maxBonusForwardCells:Number(maxBonusTravel.toFixed(6)),results:tests};
+  }
+  root.LumiQA={run};if(typeof module!=='undefined'&&module.exports)module.exports=root.LumiQA;
+})(typeof globalThis !== 'undefined' ? globalThis : window);
+</script>
+  <script>(function () {
+  'use strict';
+  const C = window.LUMI_CONFIG, E = window.LumiEngine, $ = id => document.getElementById(id);
+  const dev = new URLSearchParams(location.search).get('dev') === '1';
+  const storageKey = dev ? 'lumi-reels-dev-v1' : 'lumi-reels-v1';
+  let game = new E.Game(), audio = new window.LumiAudio();
+  let prefs = { volume: .4, muted: false, aimGuide: false }, saveAvailable = true;
+  let lastFrame = performance.now(), uiSignature = '', guideSignature = '', lastDev = 0, fault = false, returnFocus = null;
+  try {
+    const stored = JSON.parse(localStorage.getItem(storageKey) || 'null');
+    if (stored && game.restore(stored.game)) {
+      if (stored.prefs) {
+        prefs.volume = Number.isFinite(stored.prefs.volume) ? Math.max(0,Math.min(1,stored.prefs.volume)) : .4;
+        prefs.muted = stored.prefs.muted === true; prefs.aimGuide = stored.prefs.aimGuide === true;
+      }
+    }
+  } catch (_) { saveAvailable = false; }
+  audio.setVolume(prefs.volume); audio.setMuted(prefs.muted);
+  const sprites = {};
+  for (const [role, svg] of Object.entries(window.LUMI_ART)) {
+    const img = new Image(); img.src = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg); sprites[role] = img;
+  }
+  const canvases = [0,1,2].map(i => $('reel'+i));
+  let sizes = [];
+  function resize() {
+    document.documentElement.style.setProperty('--app-height',window.innerHeight+'px');
+    sizes = canvases.map(canvas => {
+      const box = canvas.getBoundingClientRect(), ratio = Math.min(window.devicePixelRatio || 1, 3);
+      canvas.width = Math.max(1,Math.round(box.width * ratio)); canvas.height = Math.max(1,Math.round(box.height * ratio));
+      return { w: box.width, h: box.height, ratio };
+    });
+    renderReels();
+  }
+  function renderReels() {
+    canvases.forEach((canvas,r) => {
+      const {w,h,ratio} = sizes[r] || {w:100,h:300,ratio:1}, ctx = canvas.getContext('2d');
+      if (!ctx || !w || !h) return;
+      ctx.setTransform(ratio,0,0,ratio,0,0); ctx.clearRect(0,0,w,h);
+      const paper = ctx.createLinearGradient(0,0,w,0);
+      paper.addColorStop(0,'#e5e1db'); paper.addColorStop(.18,'#faf7ef'); paper.addColorStop(.8,'#faf7ef'); paper.addColorStop(1,'#e3dfd9');
+      ctx.fillStyle = paper; ctx.fillRect(0,0,w,h);
+      const p = game.reels[r].p, cell = h/3;
+      // For a fixed k, y increases with p: sprites always travel top -> bottom.
+      for (let k = Math.floor(p)-2; k <= Math.floor(p)+3; k++) {
+        const symbol = C.strips[r][E.mod(-k)], y = (p-k+1)*cell;
+        const maxH = cell * .91, maxW = w * .89, imageW = Math.min(maxW,maxH*160/120), imageH = imageW*120/160;
+        const img = sprites[symbol];
+        if (img && img.complete && img.naturalWidth) ctx.drawImage(img,(w-imageW)/2,y+(cell-imageH)/2,imageW,imageH);
+        else { ctx.fillStyle = '#6b527b'; ctx.font = 'bold '+Math.min(24,cell*.3)+'px sans-serif'; ctx.textAlign='center';ctx.fillText(symbol==='BIG'?'7':symbol==='REG'?'BAR':C.labels[symbol],w/2,y+cell*.62); }
+      }
+      const shade = ctx.createLinearGradient(0,0,0,h);
+      shade.addColorStop(0,'#10102038'); shade.addColorStop(.12,'#10102000'); shade.addColorStop(.85,'#10102000'); shade.addColorStop(1,'#10102038');
+      ctx.fillStyle=shade;ctx.fillRect(0,0,w,h);ctx.strokeStyle='#bdb9b04a';ctx.lineWidth=1;
+      [1,2].forEach(row=>{ctx.beginPath();ctx.moveTo(0,row*cell);ctx.lineTo(w,row*cell);ctx.stroke();});
+    });
+  }
+  function save() {
+    try {
+      localStorage.setItem(storageKey,JSON.stringify({game:game.exportState(),prefs})); saveAvailable = true;
+    } catch (_) { saveAvailable = false; }
+    $('saveStatus').textContent = saveAvailable ? '自動保存' : '保存不可・遊技は可能';
+  }
+  function events() {
+    const items = game.drainEvents();
+    items.forEach(event => {
+      if (['bet','lever','stop','notice','coins','replay'].includes(event.type)) audio.effect(event.type,event.index);
+      if (event.type === 'bonusStart') { audio.effect('fanfare'); audio.startBgm(1.4); }
+      if (event.type === 'bonusComplete') { audio.stopBgm(); audio.effect('complete'); }
+      if (event.type === 'bonusEnd') audio.stopBgm();
+    });
+    if (items.length) save();
+  }
+  function syncClock(now = performance.now()) {
+    if (!game.paused && !document.hidden && !fault) {
+      try { game.advance(Math.max(0,(now-lastFrame)/1000)); events(); }
+      catch (error) { fault = true; game.pause(); game.message = '停止制御を安全に停止しました。再読み込みしてください。'; console.error(error); }
+    }
+    lastFrame = now;
+  }
+  const phaseNames = {BET:'BET待ち',LEVER:'レバー待ち',SPIN:'回転中',PAY:'払い出し中',BONUS_INTRO:'BONUS開始',BONUS_OUTRO:'BONUS終了'};
+  function renderUi(force = false) {
+    const sig = JSON.stringify([game.credits,game.phase,game.mode,game.betCount,game.lastPayout,game.lamp,game.setting,game.message,game.stats,game.wins,game.bonus,game.paused,prefs,saveAvailable,game.reels.map(r=>[r.running,!!r.stopping])]);
+    if (force || sig !== uiSignature) {
+      uiSignature = sig;
+      $('credits').textContent = game.credits.toLocaleString('ja-JP'); $('betCount').textContent = game.betCount; $('payout').textContent = game.lastPayout;
+      $('totalGames').textContent = game.stats.total.toLocaleString('ja-JP'); $('sinceBonus').textContent = game.stats.sinceBonus;
+      $('bigCount').textContent = game.stats.big; $('regCount').textContent = game.stats.reg;
+      $('settingBadge').innerHTML = '設定 <b>'+game.setting+'</b>'; $('phaseBadge').textContent = phaseNames[game.phase];
+      $('message').textContent = game.message;
+      $('betButton').disabled = game.paused || game.phase !== 'BET' || game.credits < C.bet;
+      $('lever').disabled = game.paused || game.phase !== 'LEVER';
+      [0,1,2].forEach(i=>{ $('stop'+i).disabled=game.paused || game.phase!=='SPIN' || !game.reels[i].running || !!game.reels[i].stopping; });
+      $('refill').hidden = !(game.phase==='BET' && game.credits<C.bet);
+      $('lamp').classList.toggle('lit',game.lamp); $('lamp').setAttribute('aria-label','告知ランプ '+(game.lamp?'点灯 ボーナス内部当選':'消灯'));
+      $('lampCaption').textContent = game.lamp ? (game.mode==='BONUS'?'BONUS!':'BONUS IS WAITING') : 'BONUS SIGNAL';
+      const active = game.mode==='BONUS'; $('machine').classList.toggle('bonus',active); $('machine').classList.toggle('reg',active && game.bonus.type==='REG');
+      $('bonusPanel').querySelector('.normal-banner').hidden=active; $('bonusPanel').querySelector('.bonus-content').hidden=!active;
+      if (active) {
+        $('bonusTitle').textContent=game.bonus.type+(game.phase==='BONUS_OUTRO'?' COMPLETE':' BONUS'); $('remaining').textContent=game.bonus.remaining;
+        $('bonusNet').textContent=(game.bonus.net>=0?'+':'')+game.bonus.net; $('bonusProgress').style.width=(game.bonus.remaining/game.bonus.total*100)+'%';
+      } else $('bonusProgress').style.width='0%';
+      const winSet=new Set(game.wins.map(w=>w.line));
+      $('lineOverlay').querySelectorAll('path').forEach(p=>p.classList.toggle('active',winSet.has(Number(p.dataset.line))));
+      $('winLines').textContent=game.wins.length ? game.wins.map(w=>C.lineNames[w.line]).join('・')+' 成立' : '横3本 + 斜め2本';
+      $('winLines').classList.toggle('won',game.wins.length>0);
+      const visible=E.boardAt(game.reels.map(r=>r.p));
+      canvases.forEach((canvas,r)=>{ if(!game.reels[r].running) canvas.setAttribute('aria-label',['左','中','右'][r]+'リール：上 '+C.labels[visible[r][0]]+'、中 '+C.labels[visible[r][1]]+'、下 '+C.labels[visible[r][2]]); });
+      $('pauseOverlay').hidden=!game.paused; $('pause').setAttribute('aria-label',game.paused?'再開':'一時停止');
+      $('mute').textContent=prefs.muted?'×♪':'♪'; $('mute').setAttribute('aria-label',prefs.muted?'音を出す':'消音する');
+      $('soundStatus').textContent=prefs.muted?'SOUND OFF':audio.ctx?'SOUND ON':'最初の操作でサウンドON';
+      $('saveStatus').textContent=saveAvailable?'自動保存':'保存不可・遊技は可能';
+      $('applySetting').disabled=!game.canChange(); $('settingSelect').disabled=!game.canChange();
+      const controlsLocked=game.paused || game.phase!=='BET' || game.mode==='BONUS';
+      $('slip').disabled=controlsLocked; $('speed').disabled=controlsLocked;
+      $('settingLock').textContent=game.canChange()?'適用するとメダルは1,000枚、遊技データは0に戻ります。':'変更できるのは通常時・BET待ち・ボーナス非当選時です。';
+      $('oddsTable').querySelectorAll('tr').forEach((tr,i)=>tr.classList.toggle('current',i+1===game.setting));
+    }
+    const guideKey=JSON.stringify([prefs.aimGuide,game.lamp,game.role,game.pending,game.phase,game.paused,game.reels.map(r=>[Math.floor(r.p),r.target,!!r.stopping])]);
+    if(guideKey!==guideSignature){guideSignature=guideKey;[0,1,2].forEach(i=>{
+      let aim=false;
+      if (prefs.aimGuide && game.lamp && game.role===game.pending && game.phase==='SPIN' && !game.reels[i].stopping) {
+        try { aim=game.chooseStop(i).rank>=100; } catch (_) {}
+      }
+      $('stop'+i).classList.toggle('aim',aim);
+    });}
+    if (dev && (force || performance.now()-lastDev>140)) {
+      lastDev=performance.now();$('devState').textContent=JSON.stringify({...game.snapshot(),
+        audio:{state:audio.ctx?audio.ctx.state:'locked',volume:prefs.volume,muted:prefs.muted,bgm:audio.bgm},
+        viewport:{width:window.innerWidth,height:window.innerHeight},browser:navigator.userAgent},null,2);
+    }
+  }
+  function action(fn) { syncClock(); audio.unlock(); fn(); events(); renderUi(true); renderReels(); }
+  // Stop timing is sampled on pointerdown. The later synthetic click is consumed.
+  // Keyboard / accessibility activation still uses click with detail === 0.
+  function bindInstant(element,fn) {
+    if ('PointerEvent' in window) {
+      element.addEventListener('pointerdown',event=>{
+        if (event.button!==0 || element.disabled) return;
+        event.preventDefault(); action(fn);
+      },{passive:false});
+      element.addEventListener('click',event=>{event.preventDefault();if(event.detail===0 && !element.disabled)action(fn);});
+    } else {
+      let touchedAt=-Infinity;
+      element.addEventListener('touchstart',event=>{if(element.disabled)return;event.preventDefault();touchedAt=performance.now();action(fn);},{passive:false});
+      element.addEventListener('click',event=>{event.preventDefault();if(!element.disabled&&performance.now()-touchedAt>700)action(fn);});
+    }
+    element.addEventListener('contextmenu',event=>event.preventDefault());
+  }
+  bindInstant($('betButton'),()=>game.bet());bindInstant($('lever'),()=>game.lever());
+  [0,1,2].forEach(i=>bindInstant($('stop'+i),()=>game.stop(i)));bindInstant($('refill'),()=>game.refill());
+  // Some iOS releases accept audio activation on touchend/click rather than pointerdown.
+  // These handlers unlock audio only; all game actions remain single-dispatch.
+  ['pointerup','touchend','click'].forEach(type=>document.addEventListener(type,()=>{
+    if(!document.hidden&&!game.paused)audio.unlock();
+  },{capture:true,passive:true}));
+  function pause() { syncClock(); game.pause(); audio.suspend(); events(); renderUi(true); }
+  function resume() {
+    lastFrame=performance.now(); audio.resume(); game.resume();
+    if(game.mode==='BONUS'&&game.phase!=='BONUS_OUTRO') audio.startBgm(game.phase==='BONUS_INTRO'?Math.max(0,game.deadline-game.time):0);
+    events(); renderUi(true);
+  }
+  $('resumeButton').addEventListener('click',resume);$('pause').addEventListener('click',()=>game.paused?resume():pause());
+  $('mute').addEventListener('click',()=>action(()=>{prefs.muted=!prefs.muted;audio.setMuted(prefs.muted);save();}));
+  function openModal(id) {
+    returnFocus=document.activeElement;$(id).hidden=false;
+    if(id==='settingsModal') {
+      $('volume').value=Math.round(prefs.volume*100);$('volumeValue').textContent=Math.round(prefs.volume*100)+'%';$('aimGuide').checked=prefs.aimGuide;
+      $('slip').value=game.slip;$('slipValue').textContent=game.slip+'コマ';$('speed').value=game.speed;$('speedValue').textContent=game.speed+'コマ/秒';$('settingSelect').value=game.setting;
+    }
+    renderUi(true); $(id).querySelector('[data-close]').focus();
+  }
+  function closeModal(id) {$(id).hidden=true;if(returnFocus&&returnFocus.focus)returnFocus.focus();}
+  $('helpOpen').addEventListener('click',()=>openModal('helpModal'));$('settingsOpen').addEventListener('click',()=>openModal('settingsModal'));
+  document.querySelectorAll('[data-close]').forEach(button=>button.addEventListener('click',()=>closeModal(button.dataset.close)));
+  ['helpModal','settingsModal'].forEach(id=>$(id).addEventListener('click',event=>{if(event.target===$(id))closeModal(id);}));
+  $('volume').addEventListener('input',()=>{audio.unlock();prefs.volume=Number($('volume').value)/100;audio.setVolume(prefs.volume);$('volumeValue').textContent=Math.round(prefs.volume*100)+'%';save();});
+  $('aimGuide').addEventListener('change',()=>{prefs.aimGuide=$('aimGuide').checked;save();renderUi(true);});
+  ['slip','speed'].forEach(id=>$(id).addEventListener('input',()=>action(()=>{game.setControls(Number($('slip').value),Number($('speed').value));$('slipValue').textContent=game.slip+'コマ';$('speedValue').textContent=game.speed+'コマ/秒';})));
+  $('applySetting').addEventListener('click',()=>action(()=>{if(game.setSetting(Number($('settingSelect').value)))closeModal('settingsModal');}));
+  document.addEventListener('keydown',event=>{
+    if(event.key==='Escape') {['helpModal','settingsModal'].forEach(closeModal);return;}
+    const modal=['helpModal','settingsModal'].find(id=>!$(id).hidden);
+    if(modal || /INPUT|SELECT|TEXTAREA/.test(event.target.tagName) || event.repeat)return;
+    const key=event.key.toLowerCase();
+    const f={b:()=>game.bet(),' ':()=>game.lever(),enter:()=>game.lever(),'1':()=>game.stop(0),'2':()=>game.stop(1),'3':()=>game.stop(2)}[key];
+    if(f){event.preventDefault();action(f);}else if(key==='p'){event.preventDefault();game.paused?resume():pause();}else if(key==='m'){prefs.muted=!prefs.muted;audio.setMuted(prefs.muted);save();renderUi(true);}
+  });
+  document.addEventListener('visibilitychange',()=>{if(document.hidden)pause();else{lastFrame=performance.now();renderUi(true);}});
+  window.addEventListener('pagehide',pause);window.addEventListener('pageshow',()=>{lastFrame=performance.now();resize();renderUi(true);});
+  window.addEventListener('resize',resize);window.addEventListener('orientationchange',()=>requestAnimationFrame(resize));
+  if(window.visualViewport)window.visualViewport.addEventListener('resize',resize);
+  if(window.ResizeObserver)new ResizeObserver(resize).observe($('reelWindow'));
+  $('betButton').querySelector('span').textContent=C.bet+'枚';
+  $('lineOverlay').querySelectorAll('path').forEach(path=>{
+    const line=E.lineCoordinates(C.lines[Number(path.dataset.line)]);
+    path.setAttribute('d','M'+line.x1+' '+line.y1+'L'+line.x2+' '+line.y2);
+  });
+  $('helpModal').querySelector('.intro').textContent=C.bet+'枚BET → レバー → 左・中・右を好きな順番で停止。';
+  const netPerGame=C.payouts.GRAPE-C.bet;
+  $('bonusRules').textContent='ボーナス中は目押し不要。BIG '+C.bonus.BIG.games+'G／REG '+C.bonus.REG.games+'G、毎ゲーム'+C.bet+'枚BETでぶどう'+C.payouts.GRAPE+'枚。全ゲーム完走でBIG純増'+(C.bonus.BIG.games*netPerGame)+'枚、REG純増'+(C.bonus.REG.games*netPerGame)+'枚です。';
+  $('oddsTable').innerHTML=C.settings.map((s,i)=>'<tr><td>'+(i+1)+'</td><td>1/'+s.BIG+'</td><td>1/'+s.REG+'</td><td>1/'+(1/(1/s.BIG+1/s.REG)).toFixed(1)+'</td>'+['GRAPE','CHERRY','BELL','REPLAY'].map(role=>'<td>1/'+s[role]+'</td>').join('')+'</tr>').join('');
+  $('prizeList').innerHTML=['BIG','REG','GRAPE','CHERRY','BELL','REPLAY'].map(role=>'<div><img alt="'+C.labels[role]+'" src="'+sprites[role].src+'"><small>'+C.labels[role]+' '+(role==='BIG'||role==='REG'?C.bonus[role].games+'G':role==='REPLAY'?'再遊技':C.payouts[role]+'枚')+'</small></div>').join('');
+  if(dev) {
+    $('devPanel').hidden=false;
+    $('forceApply').addEventListener('click',()=>action(()=>{game.devForce($('forceRole').value,$('forceNotice').value);$('devNote').textContent='次のレバー：'+C.labels[$('forceRole').value]+' / '+$('forceNotice').value;}));
+    [0,1,2].forEach(i=>{
+      const wrapper=document.createElement('div');wrapper.innerHTML='<label>'+['左','中','右'][i]+'位置<input id="devPos'+i+'" type="number" value="0" step="0.05"></label><button id="devSet'+i+'">位置を適用</button><button id="devAim'+i+'">内部役を狙って停止</button><button id="devMiss'+i+'">取りこぼして停止</button>';
+      $('devReels').appendChild(wrapper);
+      $('devSet'+i).addEventListener('click',()=>action(()=>game.devPosition(i,Number($('devPos'+i).value))));
+      $('devAim'+i).addEventListener('click',()=>action(()=>{
+        const idx=C.strips[i].indexOf(game.role);if(idx<0)return;
+        const target=E.mod(-idx);game.devPosition(i,target-2.3);game.stop(i);
+      }));
+      $('devMiss'+i).addEventListener('click',()=>action(()=>{
+        if(game.mode==='BONUS'){$('devNote').textContent='ボーナス中は取りこぼしません。';return;}
+        for(let p=0;p<24;p++){
+          if(!game.devPosition(i,p+.37))return;
+          if(game.chooseStop(i).rank<100){game.stop(i);return;}
+        }
+      }));
+    });
+    $('devAdvance').addEventListener('click',()=>action(()=>game.advance(2)));
+    $('devReset').addEventListener('click',()=>{audio.stopBgm();game=new E.Game();fault=false;lastFrame=performance.now();save();renderUi(true);});
+    $('devSuite').addEventListener('click',()=>{
+      $('devResults').hidden=false;$('devResults').textContent='検証中…';$('devSuite').disabled=true;
+      setTimeout(()=>{
+        try{const result=window.LumiQA.run();$('devResults').textContent=JSON.stringify(result,null,2);}catch(error){$('devResults').textContent='FAIL '+error.stack;}
+        finally{$('devSuite').disabled=false;}
+      },60);
+    });
+    // Exposed only with ?dev=1; never present during ordinary play.
+    window.LumiDev={snapshot:()=>game.snapshot(),force:(role,notice)=>game.devForce(role,notice),getGame:()=>game};
+  }
+  if(game.mode==='BONUS'&&!game.paused)audio.startBgm();
+  resize(); renderUi(true); save();
+  function frame(now) {syncClock(now);renderReels();renderUi();audio.pump();requestAnimationFrame(frame);}
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

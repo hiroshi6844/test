@@ -1,0 +1,125 @@
+{
+  "status": "PASS",
+  "tests": 10,
+  "assertions": 57719,
+  "scenarioCases": 42567,
+  "maxBonusForwardCells": 5.980744,
+  "results": [
+    {
+      "name": "BET不足・連打・単独停止・レバー抽選は1回",
+      "status": "PASS"
+    },
+    {
+      "name": "BIG・REG目押し成功：全6停止順と全設定",
+      "status": "PASS"
+    },
+    {
+      "name": "全3リールそれぞれの取りこぼし・持ち越し：全6停止順",
+      "status": "PASS"
+    },
+    {
+      "name": "先告知・後告知・重複当選防止・持ち越し中の小役優先",
+      "status": "PASS"
+    },
+    {
+      "name": "経過時間・滑り上限・速度連続・単調減速・前向き停止",
+      "status": "PASS"
+    },
+    {
+      "name": "全5ラインの図柄・判定・払い出し、リプレイの無料BET",
+      "status": "PASS"
+    },
+    {
+      "name": "ボーナス全G・全停止順・タイミング不問・最終払い出し先行",
+      "status": "PASS"
+    },
+    {
+      "name": "非当選役の見た目成立を排除：全41,472停止窓＋ランダム遊技",
+      "status": "PASS"
+    },
+    {
+      "name": "設定変更制限・確率表の単調性・メダル補充",
+      "status": "PASS"
+    },
+    {
+      "name": "アプリ中断・復帰・回転中保存・払い出し途中保存",
+      "status": "PASS"
+    }
+  ],
+  "observed_in_browser": true,
+  "browser": "Chrome 154.0.0.0 (cloud)",
+  "recorded_at_jst": "2026-10-09T00:59:48+09:00",
+  "manual_checks": "See TEST_RESULTS.md",
+  "layouts": [
+    {
+      "width": 390,
+      "height": 844,
+      "appHeight": 838,
+      "maxActionBottom": 691,
+      "stopsBottom": 608,
+      "statsBottom": 803,
+      "reelHeight": 269,
+      "canvasHeight": 267
+    },
+    {
+      "width": 375,
+      "height": 667,
+      "appHeight": 666,
+      "maxActionBottom": 529,
+      "stopsBottom": 452,
+      "statsBottom": 635,
+      "reelHeight": 137,
+      "canvasHeight": 135
+    },
+    {
+      "width": 320,
+      "height": 568,
+      "appHeight": 557,
+      "maxActionBottom": 444,
+      "stopsBottom": 375,
+      "statsBottom": 536,
+      "reelHeight": 108,
+      "canvasHeight": 106
+    },
+    {
+      "width": 844,
+      "height": 390,
+      "appHeight": 389,
+      "maxActionBottom": 335,
+      "stopsBottom": 346,
+      "statsBottom": 322,
+      "reelHeight": 160,
+      "canvasHeight": 158
+    },
+    {
+      "width": 667,
+      "height": 375,
+      "appHeight": 374,
+      "maxActionBottom": 328,
+      "stopsBottom": 331,
+      "statsBottom": 311,
+      "reelHeight": 145,
+      "canvasHeight": 143
+    },
+    {
+      "width": 768,
+      "height": 1024,
+      "appHeight": 930,
+      "maxActionBottom": 781,
+      "stopsBottom": 698,
+      "statsBottom": 895,
+      "reelHeight": 330,
+      "canvasHeight": 328
+    },
+    {
+      "width": 1024,
+      "height": 768,
+      "appHeight": 762,
+      "maxActionBottom": 615,
+      "stopsBottom": 532,
+      "statsBottom": 727,
+      "reelHeight": 193,
+      "canvasHeight": 191
+    }
+  ]
+}
