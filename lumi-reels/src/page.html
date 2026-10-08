@@ -66,7 +66,7 @@
       <div><span>BIG</span><b id="bigCount">0</b><small>回</small></div>
       <div><span>REG</span><b id="regCount">0</b><small>回</small></div>
     </div>
-    <footer><span id="soundStatus">最初の操作でサウンドON</span><span id="saveStatus">自動保存</span><span>VIRTUAL MEDALS ONLY</span></footer>
+    <footer><span id="soundStatus">最初の操作でサウンドON</span><span id="saveStatus">自動保存</span><span id="buildVersion">VIRTUAL MEDALS</span></footer>
     <section id="devPanel" class="dev-panel" hidden>
       <h2>開発モード</h2><p>URLの ?dev=1 でのみ表示。検証用の操作は通常プレイで非表示です。</p>
       <div class="dev-controls"><label>次の役<select id="forceRole"><option value="MISS">ハズレ</option><option value="BIG">BIG</option><option value="REG">REG</option><option value="GRAPE">ぶどう</option><option value="CHERRY">チェリー</option><option value="BELL">ベル</option><option value="REPLAY">リプレイ</option></select></label>
@@ -81,7 +81,7 @@
     <div class="sheet"><div class="sheet-head"><h2 id="helpTitle">遊び方</h2><button data-close="helpModal" aria-label="遊び方を閉じる">×</button></div>
       <div class="sheet-body">
         <p class="intro">3枚BET → レバー → 左・中・右を好きな順番で停止。</p>
-        <ol><li>ランプが光ったらボーナス内部当選。<b>7・7・7</b>でBIG、<b>BAR・BAR・BAR</b>でREGが始まります。</li><li><b>全3リールで目押しが必要</b>です。図柄が上から流れてくるタイミングで停止。設定した滑りの範囲だけ引き込みます。届かなかった当選は次のゲームへ持ち越します。</li><li>有効ラインは横3本・斜め2本。目押しガイドをONにすると、ボーナス図柄を引き込める停止ボタンが緑に光ります。</li><li id="bonusRules">ボーナス中は目押し不要。BIG 50G／REG 20G、毎ゲーム3枚BETでぶどう8枚。全ゲーム完走でBIG純増250枚、REG純増100枚です。</li><li>リプレイ成立後はBET済みになるため、そのままレバーを操作します。</li></ol>
+        <ol><li>ランプが光ったらボーナス内部当選。ランプの下に<b>狙う図柄（7／BAR）</b>が表示されます。<b>7・7・7</b>でBIG、<b>BAR・BAR・BAR</b>でREGが始まります。</li><li><b>全3リールで目押しが必要</b>です。中段を目安に、図柄が上から流れてくるタイミングで停止。中段、横ライン、斜めラインの順に優先し、設定した滑りの範囲だけ引き込みます。届かなかった当選は次のゲームへ持ち越します。</li><li>有効ラインは横3本・斜め2本。目押しガイドをONにすると、ボーナス図柄を引き込める停止ボタンが緑に光ります。</li><li id="bonusRules">ボーナス中は目押し不要。BIG 50G／REG 20G、毎ゲーム3枚BETでぶどう8枚。全ゲーム完走でBIG純増250枚、REG純増100枚です。</li><li>リプレイ成立後はBET済みになるため、そのままレバーを操作します。</li></ol>
         <div class="prizes" id="prizeList"></div>
         <p>小役も3つ同じ図柄を有効ライン上に揃えると成立。スターは演出用で払い出しはありません。複数役の同時成立はしません。</p>
         <p>ボーナス待機中の小役・リプレイ当選はそちらが優先です。そのゲームでボーナス図柄は揃えられず、当選は持ち越します。</p>

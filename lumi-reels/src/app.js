@@ -91,8 +91,9 @@
       $('lever').disabled = game.paused || game.phase !== 'LEVER';
       [0,1,2].forEach(i=>{ $('stop'+i).disabled=game.paused || game.phase!=='SPIN' || !game.reels[i].running || !!game.reels[i].stopping; });
       $('refill').hidden = !(game.phase==='BET' && game.credits<C.bet);
-      $('lamp').classList.toggle('lit',game.lamp); $('lamp').setAttribute('aria-label','告知ランプ '+(game.lamp?'点灯 ボーナス内部当選':'消灯'));
-      $('lampCaption').textContent = game.lamp ? (game.mode==='BONUS'?'BONUS!':'BONUS IS WAITING') : 'BONUS SIGNAL';
+      const bonusSymbol=game.pending==='REG'?'BAR':'7';
+      $('lamp').classList.toggle('lit',game.lamp); $('lamp').setAttribute('aria-label','告知ランプ '+(game.lamp?(game.mode==='BONUS'?'点灯 ボーナス開始':'点灯 '+bonusSymbol+' を3リールで狙う'):'消灯'));
+      $('lampCaption').textContent = game.lamp ? (game.mode==='BONUS'?'BONUS!':bonusSymbol+' を狙おう') : 'BONUS SIGNAL';
       const active = game.mode==='BONUS'; $('machine').classList.toggle('bonus',active); $('machine').classList.toggle('reg',active && game.bonus.type==='REG');
       $('bonusPanel').querySelector('.normal-banner').hidden=active; $('bonusPanel').querySelector('.bonus-content').hidden=!active;
       if (active) {
@@ -101,7 +102,8 @@
       } else $('bonusProgress').style.width='0%';
       const winSet=new Set(game.wins.map(w=>w.line));
       $('lineOverlay').querySelectorAll('path').forEach(p=>p.classList.toggle('active',winSet.has(Number(p.dataset.line))));
-      $('winLines').textContent=game.wins.length ? game.wins.map(w=>C.lineNames[w.line]).join('・')+' 成立' : '横3本 + 斜め2本';
+      $('winLines').textContent=game.wins.length ? game.wins.map(w=>C.lineNames[w.line]).join('・')+' 成立' :
+        game.lamp&&game.phase==='SPIN'&&game.role===game.pending?'中段を目安に '+bonusSymbol+' を狙おう':'横3本 + 斜め2本';
       $('winLines').classList.toggle('won',game.wins.length>0);
       const visible=E.boardAt(game.reels.map(r=>r.p));
       canvases.forEach((canvas,r)=>{ if(!game.reels[r].running) canvas.setAttribute('aria-label',['左','中','右'][r]+'リール：上 '+C.labels[visible[r][0]]+'、中 '+C.labels[visible[r][1]]+'、下 '+C.labels[visible[r][2]]); });
@@ -124,7 +126,7 @@
       $('stop'+i).classList.toggle('aim',aim);
     });}
     if (dev && (force || performance.now()-lastDev>140)) {
-      lastDev=performance.now();$('devState').textContent=JSON.stringify({...game.snapshot(),
+      lastDev=performance.now();$('devState').textContent=JSON.stringify({...game.snapshot(),release:C.release,
         audio:{state:audio.ctx?audio.ctx.state:'locked',volume:prefs.volume,muted:prefs.muted,bgm:audio.bgm},
         viewport:{width:window.innerWidth,height:window.innerHeight},browser:navigator.userAgent},null,2);
     }
@@ -191,6 +193,7 @@
   if(window.visualViewport)window.visualViewport.addEventListener('resize',resize);
   if(window.ResizeObserver)new ResizeObserver(resize).observe($('reelWindow'));
   $('betButton').querySelector('span').textContent=C.bet+'枚';
+  $('buildVersion').textContent='VIRTUAL MEDALS · v'+C.release;
   $('lineOverlay').querySelectorAll('path').forEach(path=>{
     const line=E.lineCoordinates(C.lines[Number(path.dataset.line)]);
     path.setAttribute('d','M'+line.x1+' '+line.y1+'L'+line.x2+' '+line.y2);
@@ -209,7 +212,7 @@
       $('devSet'+i).addEventListener('click',()=>action(()=>game.devPosition(i,Number($('devPos'+i).value))));
       $('devAim'+i).addEventListener('click',()=>action(()=>{
         const idx=C.strips[i].indexOf(game.role);if(idx<0)return;
-        const target=E.mod(-idx);game.devPosition(i,target-2.3);game.stop(i);
+        const target=E.mod(-idx);game.devPosition(i,target-.5);game.stop(i);
       }));
       $('devMiss'+i).addEventListener('click',()=>action(()=>{
         if(game.mode==='BONUS'){$('devNote').textContent='ボーナス中は取りこぼしません。';return;}

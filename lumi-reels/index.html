@@ -196,7 +196,7 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
       <div><span>BIG</span><b id="bigCount">0</b><small>回</small></div>
       <div><span>REG</span><b id="regCount">0</b><small>回</small></div>
     </div>
-    <footer><span id="soundStatus">最初の操作でサウンドON</span><span id="saveStatus">自動保存</span><span>VIRTUAL MEDALS ONLY</span></footer>
+    <footer><span id="soundStatus">最初の操作でサウンドON</span><span id="saveStatus">自動保存</span><span id="buildVersion">VIRTUAL MEDALS</span></footer>
     <section id="devPanel" class="dev-panel" hidden>
       <h2>開発モード</h2><p>URLの ?dev=1 でのみ表示。検証用の操作は通常プレイで非表示です。</p>
       <div class="dev-controls"><label>次の役<select id="forceRole"><option value="MISS">ハズレ</option><option value="BIG">BIG</option><option value="REG">REG</option><option value="GRAPE">ぶどう</option><option value="CHERRY">チェリー</option><option value="BELL">ベル</option><option value="REPLAY">リプレイ</option></select></label>
@@ -211,7 +211,7 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
     <div class="sheet"><div class="sheet-head"><h2 id="helpTitle">遊び方</h2><button data-close="helpModal" aria-label="遊び方を閉じる">×</button></div>
       <div class="sheet-body">
         <p class="intro">3枚BET → レバー → 左・中・右を好きな順番で停止。</p>
-        <ol><li>ランプが光ったらボーナス内部当選。<b>7・7・7</b>でBIG、<b>BAR・BAR・BAR</b>でREGが始まります。</li><li><b>全3リールで目押しが必要</b>です。図柄が上から流れてくるタイミングで停止。設定した滑りの範囲だけ引き込みます。届かなかった当選は次のゲームへ持ち越します。</li><li>有効ラインは横3本・斜め2本。目押しガイドをONにすると、ボーナス図柄を引き込める停止ボタンが緑に光ります。</li><li id="bonusRules">ボーナス中は目押し不要。BIG 50G／REG 20G、毎ゲーム3枚BETでぶどう8枚。全ゲーム完走でBIG純増250枚、REG純増100枚です。</li><li>リプレイ成立後はBET済みになるため、そのままレバーを操作します。</li></ol>
+        <ol><li>ランプが光ったらボーナス内部当選。ランプの下に<b>狙う図柄（7／BAR）</b>が表示されます。<b>7・7・7</b>でBIG、<b>BAR・BAR・BAR</b>でREGが始まります。</li><li><b>全3リールで目押しが必要</b>です。中段を目安に、図柄が上から流れてくるタイミングで停止。中段、横ライン、斜めラインの順に優先し、設定した滑りの範囲だけ引き込みます。届かなかった当選は次のゲームへ持ち越します。</li><li>有効ラインは横3本・斜め2本。目押しガイドをONにすると、ボーナス図柄を引き込める停止ボタンが緑に光ります。</li><li id="bonusRules">ボーナス中は目押し不要。BIG 50G／REG 20G、毎ゲーム3枚BETでぶどう8枚。全ゲーム完走でBIG純増250枚、REG純増100枚です。</li><li>リプレイ成立後はBET済みになるため、そのままレバーを操作します。</li></ol>
         <div class="prizes" id="prizeList"></div>
         <p>小役も3つ同じ図柄を有効ライン上に揃えると成立。スターは演出用で払い出しはありません。複数役の同時成立はしません。</p>
         <p>ボーナス待機中の小役・リプレイ当選はそちらが優先です。そのゲームでボーナス図柄は揃えられず、当選は持ち越します。</p>
@@ -241,7 +241,7 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
 (function (root) {
   'use strict';
   const C = {
-    version: 1,
+    version: 1, release: '1.1',
     initialMedals: 1000, bet: 3, speed: 13.5, brakeSeconds: 0.12,
     maxSlip: 4, slipMin: 3, slipMax: 6, bonusMaxTravel: 6, coinSeconds: 0.035,
     bonusIntroSeconds: 1.65, bonusOutroSeconds: 1.4,
@@ -400,7 +400,10 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
         reel.running = true; reel.stopping = null; reel.target = null;
       });
       this.message = this.mode === 'BONUS' ? 'どのタイミングでも、ぶどうが揃います。' :
-        (this.lamp ? 'ランプ点灯！ 7 または BAR を全リールで狙おう。' : '好きな順番で、リールを止めよう。');
+        (this.lamp ? (this.role === this.pending ?
+          'ランプ点灯！ '+(this.pending==='REG'?'BAR':'7')+' を全リールで狙おう。中段を目安に。' :
+          '今回は小役・リプレイ優先。ボーナス当選は持ち越します。') :
+          '好きな順番で、リールを止めよう。');
       this.emit('lever'); return true;
     }
     position(reel, time = this.time) {
@@ -439,9 +442,16 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
         if (!choices.length) continue;
         const winning = choices.filter(b => b.wins.some(w => w.role === this.role));
         if (this.mode === 'BONUS' && !winning.length) continue;
-        // A target is desirable only if each already-pressed reel can still share a real line.
+        // All centre symbols within the slip window must land on the same centre line.
+        // Counting possible lines biased outside reels to bottom/top, then the middle
+        // reel chose a diagonal whose last symbol had already passed its stop window.
+        // Prefer centre, then a horizontal line, then a diagonal; ties stop sooner.
         const lines = new Set(winning.flatMap(b => b.wins.filter(w => w.role === this.role).map(w => w.line)));
-        const rank = (winning.length ? 100 : 0) + lines.size;
+        const priority = Math.max(0,...[...lines].map(index=>{
+          const line=C.lines[index];
+          return line.every(row=>row===1)?3:line.every(row=>row===line[0])?2:1;
+        }));
+        const rank = (winning.length ? 100 : 0) + priority;
         if (!best || rank > best.rank) best = { target, rank, possibleLines: [...lines] };
         if (this.mode === 'BONUS' && best) break;
       }
@@ -532,7 +542,7 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
           this.message = this.bonus.type + ' COMPLETE！ 純増 +' + this.bonus.net + '枚'; this.emit('bonusComplete'); return;
         }
         this.message = 'ぶどう +' + C.payouts.GRAPE + '枚。あと ' + this.bonus.remaining + 'G。';
-      } else if (this.pending) this.message = '当選は持ち越し。ランプは点灯したままです。';
+      } else if (this.pending) this.message = (this.pending==='REG'?'BAR':'7')+' の当選は持ち越し。全リールで狙おう。';
       else if (!this.wins.length) this.message = '次のゲームへ。';
       this.phase = 'BET'; this.emit('ready');
     }
@@ -731,6 +741,46 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
         equal(g.mode,'BONUS','bonus starts');equal(g.bonus.type,role,'correct bonus');equal(g.bonus.remaining,C.bonus[role].games,'initial games');equal(g.credits,997,'no lump-sum award');equal(g.stats[role==='BIG'?'big':'reg'],1,'one bonus');cases++;
       }}));
     });
+    test('中段目押しの回帰検証：全停止順・全滑り幅・混在する押下位置',()=>{
+      // Aim by the actual strip's middle-row position, never by the controller's chosen board.
+      // All three centre symbols are physically reachable in these independent stop windows.
+      for(const role of ['BIG','REG'])for(const order of orders)for(const slip of [3,4,5,6]) {
+        const offsets=[-slip+.05,-2.1,-.5,-.05];
+        for(let variant=0;variant<64;variant++) {
+          const g=new Game({rng:()=>.9});g.setControls(slip,[10,13.5,16][variant%3]);
+          g.devForce(role,'BEFORE');g.bet();g.lever();
+          order.forEach(index=>{
+            const centre=E.mod(-C.strips[index].indexOf(role));
+            const offset=offsets[(variant>>(index*2))&3];
+            g.devPosition(index,centre+offset);assert(g.stop(index),'independent centre aim accepted');
+            assert(g.reels[index].stopping.distance<=slip+1e-8,'no enlarged slip to rescue centre aim');
+            g.advance(.02);
+          });
+          g.advance(3);
+          equal(g.mode,'BONUS','reachable centre aim must win: '+role+' / '+order.join('')+' / '+slip+' / '+variant);
+          assert(g.wins.some(w=>w.role===role&&w.line===1),'all independently aimed reels meet on the centre line');
+          equal(E.boardAt(g.reels.map(r=>r.p)).map(b=>b[1]),[role,role,role],'visible centre symbols agree');cases++;
+        }
+      }
+      for(const role of ['BIG','REG'])for(const order of orders) {
+        const late=newSpin(role);
+        order.forEach(index=>{
+          late.devPosition(index,E.mod(-C.strips[index].indexOf(role))+.05);late.stop(index);late.advance(.02);
+        });late.advance(3);
+        equal(late.mode,'BONUS','just-passed centre is caught on the bottom horizontal line');
+        assert(late.wins.some(w=>w.line===2),'no backwards snap to the passed centre');cases++;
+        for(const missed of [0,1,2]) {
+          const g=newSpin(role);
+          order.forEach(index=>{
+            const centre=E.mod(-C.strips[index].indexOf(role));
+            // Once below the bottom row, the single bonus symbol cannot return within 4 cells.
+            g.devPosition(index,centre+(index===missed?1.05:-.5));g.stop(index);g.advance(.02);
+          });g.advance(3);
+          equal(g.mode,'NORMAL','one independently mistimed reel must not auto-align');
+          equal(g.pending,role,'real mistiming carries the bonus');assert(g.lamp,'real mistiming keeps the lamp');cases++;
+        }
+      }
+    });
     test('全3リールそれぞれの取りこぼし・持ち越し：全6停止順',()=>{
       ['BIG','REG'].forEach(role=>orders.forEach(order=>[0,1,2].forEach(missed=>{
         const g=newSpin(role);
@@ -781,6 +831,16 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
       for(let line=0;line<5;line++) {
         const fixture=all.find(b=>b.wins.some(w=>w.role==='BIG'&&w.line===line));assert(!!fixture,'five-line fixture exists');
         const visual=E.boardAt(fixture.pos);assert(C.lines[line].every((row,r)=>visual[r][row]==='BIG'),'visible 7 matches judged line');equal(E.winsAt(fixture.pos),fixture.wins,'judgement same board');cases++;
+      }
+      for(const role of ['BIG','REG'])for(let line=0;line<5;line++) {
+        const g=newSpin(role),order=line===4?[1,0,2]:[0,1,2];
+        order.forEach(index=>{
+          const row=C.lines[line][index],target=E.mod(-C.strips[index].indexOf(role))+row-1;
+          g.devPosition(index,target+(row===0?-g.slip+.05:-.05));
+          assert(g.stop(index),'actual five-line stop');g.advance(.02);
+        });g.advance(3);
+        equal(g.mode,'BONUS','five-line control starts bonus');
+        assert(g.wins.some(w=>w.role===role&&w.line===line),'actual control preserves each of the five paylines');cases++;
       }
       ['GRAPE','CHERRY','BELL','REPLAY'].forEach(role=>orders.forEach(order=>{
         const g=newSpin(role);complete(g,order);assert(g.wins.every(w=>w.role===role),'only internal prize visible');assert(g.wins.length>0,'aimed small prize wins');
@@ -931,8 +991,9 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
       $('lever').disabled = game.paused || game.phase !== 'LEVER';
       [0,1,2].forEach(i=>{ $('stop'+i).disabled=game.paused || game.phase!=='SPIN' || !game.reels[i].running || !!game.reels[i].stopping; });
       $('refill').hidden = !(game.phase==='BET' && game.credits<C.bet);
-      $('lamp').classList.toggle('lit',game.lamp); $('lamp').setAttribute('aria-label','告知ランプ '+(game.lamp?'点灯 ボーナス内部当選':'消灯'));
-      $('lampCaption').textContent = game.lamp ? (game.mode==='BONUS'?'BONUS!':'BONUS IS WAITING') : 'BONUS SIGNAL';
+      const bonusSymbol=game.pending==='REG'?'BAR':'7';
+      $('lamp').classList.toggle('lit',game.lamp); $('lamp').setAttribute('aria-label','告知ランプ '+(game.lamp?(game.mode==='BONUS'?'点灯 ボーナス開始':'点灯 '+bonusSymbol+' を3リールで狙う'):'消灯'));
+      $('lampCaption').textContent = game.lamp ? (game.mode==='BONUS'?'BONUS!':bonusSymbol+' を狙おう') : 'BONUS SIGNAL';
       const active = game.mode==='BONUS'; $('machine').classList.toggle('bonus',active); $('machine').classList.toggle('reg',active && game.bonus.type==='REG');
       $('bonusPanel').querySelector('.normal-banner').hidden=active; $('bonusPanel').querySelector('.bonus-content').hidden=!active;
       if (active) {
@@ -941,7 +1002,8 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
       } else $('bonusProgress').style.width='0%';
       const winSet=new Set(game.wins.map(w=>w.line));
       $('lineOverlay').querySelectorAll('path').forEach(p=>p.classList.toggle('active',winSet.has(Number(p.dataset.line))));
-      $('winLines').textContent=game.wins.length ? game.wins.map(w=>C.lineNames[w.line]).join('・')+' 成立' : '横3本 + 斜め2本';
+      $('winLines').textContent=game.wins.length ? game.wins.map(w=>C.lineNames[w.line]).join('・')+' 成立' :
+        game.lamp&&game.phase==='SPIN'&&game.role===game.pending?'中段を目安に '+bonusSymbol+' を狙おう':'横3本 + 斜め2本';
       $('winLines').classList.toggle('won',game.wins.length>0);
       const visible=E.boardAt(game.reels.map(r=>r.p));
       canvases.forEach((canvas,r)=>{ if(!game.reels[r].running) canvas.setAttribute('aria-label',['左','中','右'][r]+'リール：上 '+C.labels[visible[r][0]]+'、中 '+C.labels[visible[r][1]]+'、下 '+C.labels[visible[r][2]]); });
@@ -964,7 +1026,7 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
       $('stop'+i).classList.toggle('aim',aim);
     });}
     if (dev && (force || performance.now()-lastDev>140)) {
-      lastDev=performance.now();$('devState').textContent=JSON.stringify({...game.snapshot(),
+      lastDev=performance.now();$('devState').textContent=JSON.stringify({...game.snapshot(),release:C.release,
         audio:{state:audio.ctx?audio.ctx.state:'locked',volume:prefs.volume,muted:prefs.muted,bgm:audio.bgm},
         viewport:{width:window.innerWidth,height:window.innerHeight},browser:navigator.userAgent},null,2);
     }
@@ -1031,6 +1093,7 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
   if(window.visualViewport)window.visualViewport.addEventListener('resize',resize);
   if(window.ResizeObserver)new ResizeObserver(resize).observe($('reelWindow'));
   $('betButton').querySelector('span').textContent=C.bet+'枚';
+  $('buildVersion').textContent='VIRTUAL MEDALS · v'+C.release;
   $('lineOverlay').querySelectorAll('path').forEach(path=>{
     const line=E.lineCoordinates(C.lines[Number(path.dataset.line)]);
     path.setAttribute('d','M'+line.x1+' '+line.y1+'L'+line.x2+' '+line.y2);
@@ -1049,7 +1112,7 @@ footer { display:flex; justify-content:space-between; margin-top:13px; padding:0
       $('devSet'+i).addEventListener('click',()=>action(()=>game.devPosition(i,Number($('devPos'+i).value))));
       $('devAim'+i).addEventListener('click',()=>action(()=>{
         const idx=C.strips[i].indexOf(game.role);if(idx<0)return;
-        const target=E.mod(-idx);game.devPosition(i,target-2.3);game.stop(i);
+        const target=E.mod(-idx);game.devPosition(i,target-.5);game.stop(i);
       }));
       $('devMiss'+i).addEventListener('click',()=>action(()=>{
         if(game.mode==='BONUS'){$('devNote').textContent='ボーナス中は取りこぼしません。';return;}

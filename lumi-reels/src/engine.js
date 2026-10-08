@@ -125,7 +125,10 @@
         reel.running = true; reel.stopping = null; reel.target = null;
       });
       this.message = this.mode === 'BONUS' ? 'どのタイミングでも、ぶどうが揃います。' :
-        (this.lamp ? 'ランプ点灯！ 7 または BAR を全リールで狙おう。' : '好きな順番で、リールを止めよう。');
+        (this.lamp ? (this.role === this.pending ?
+          'ランプ点灯！ '+(this.pending==='REG'?'BAR':'7')+' を全リールで狙おう。中段を目安に。' :
+          '今回は小役・リプレイ優先。ボーナス当選は持ち越します。') :
+          '好きな順番で、リールを止めよう。');
       this.emit('lever'); return true;
     }
     position(reel, time = this.time) {
@@ -164,9 +167,16 @@
         if (!choices.length) continue;
         const winning = choices.filter(b => b.wins.some(w => w.role === this.role));
         if (this.mode === 'BONUS' && !winning.length) continue;
-        // A target is desirable only if each already-pressed reel can still share a real line.
+        // All centre symbols within the slip window must land on the same centre line.
+        // Counting possible lines biased outside reels to bottom/top, then the middle
+        // reel chose a diagonal whose last symbol had already passed its stop window.
+        // Prefer centre, then a horizontal line, then a diagonal; ties stop sooner.
         const lines = new Set(winning.flatMap(b => b.wins.filter(w => w.role === this.role).map(w => w.line)));
-        const rank = (winning.length ? 100 : 0) + lines.size;
+        const priority = Math.max(0,...[...lines].map(index=>{
+          const line=C.lines[index];
+          return line.every(row=>row===1)?3:line.every(row=>row===line[0])?2:1;
+        }));
+        const rank = (winning.length ? 100 : 0) + priority;
         if (!best || rank > best.rank) best = { target, rank, possibleLines: [...lines] };
         if (this.mode === 'BONUS' && best) break;
       }
@@ -257,7 +267,7 @@
           this.message = this.bonus.type + ' COMPLETE！ 純増 +' + this.bonus.net + '枚'; this.emit('bonusComplete'); return;
         }
         this.message = 'ぶどう +' + C.payouts.GRAPE + '枚。あと ' + this.bonus.remaining + 'G。';
-      } else if (this.pending) this.message = '当選は持ち越し。ランプは点灯したままです。';
+      } else if (this.pending) this.message = (this.pending==='REG'?'BAR':'7')+' の当選は持ち越し。全リールで狙おう。';
       else if (!this.wins.length) this.message = '次のゲームへ。';
       this.phase = 'BET'; this.emit('ready');
     }

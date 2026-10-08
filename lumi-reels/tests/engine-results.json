@@ -1,9 +1,9 @@
 {
   "status": "PASS",
-  "tests": 10,
-  "assertions": 57719,
-  "scenarioCases": 42567,
-  "maxBonusForwardCells": 5.980744,
+  "tests": 11,
+  "assertions": 85665,
+  "scenarioCases": 45697,
+  "maxBonusForwardCells": 5.988627,
   "results": [
     {
       "name": "BET不足・連打・単独停止・レバー抽選は1回",
@@ -11,6 +11,10 @@
     },
     {
       "name": "BIG・REG目押し成功：全6停止順と全設定",
+      "status": "PASS"
+    },
+    {
+      "name": "中段目押しの回帰検証：全停止順・全滑り幅・混在する押下位置",
       "status": "PASS"
     },
     {
@@ -47,5 +51,5 @@
     }
   ],
   "node": "v24.19.0",
-  "elapsedMs": 2586
+  "elapsedMs": 12642
 }

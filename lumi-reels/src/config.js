@@ -2,7 +2,7 @@
 (function (root) {
   'use strict';
   const C = {
-    version: 1,
+    version: 1, release: '1.1',
     initialMedals: 1000, bet: 3, speed: 13.5, brakeSeconds: 0.12,
     maxSlip: 4, slipMin: 3, slipMax: 6, bonusMaxTravel: 6, coinSeconds: 0.035,
     bonusIntroSeconds: 1.65, bonusOutroSeconds: 1.4,

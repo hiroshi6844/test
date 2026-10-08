@@ -41,6 +41,46 @@
         equal(g.mode,'BONUS','bonus starts');equal(g.bonus.type,role,'correct bonus');equal(g.bonus.remaining,C.bonus[role].games,'initial games');equal(g.credits,997,'no lump-sum award');equal(g.stats[role==='BIG'?'big':'reg'],1,'one bonus');cases++;
       }}));
     });
+    test('中段目押しの回帰検証：全停止順・全滑り幅・混在する押下位置',()=>{
+      // Aim by the actual strip's middle-row position, never by the controller's chosen board.
+      // All three centre symbols are physically reachable in these independent stop windows.
+      for(const role of ['BIG','REG'])for(const order of orders)for(const slip of [3,4,5,6]) {
+        const offsets=[-slip+.05,-2.1,-.5,-.05];
+        for(let variant=0;variant<64;variant++) {
+          const g=new Game({rng:()=>.9});g.setControls(slip,[10,13.5,16][variant%3]);
+          g.devForce(role,'BEFORE');g.bet();g.lever();
+          order.forEach(index=>{
+            const centre=E.mod(-C.strips[index].indexOf(role));
+            const offset=offsets[(variant>>(index*2))&3];
+            g.devPosition(index,centre+offset);assert(g.stop(index),'independent centre aim accepted');
+            assert(g.reels[index].stopping.distance<=slip+1e-8,'no enlarged slip to rescue centre aim');
+            g.advance(.02);
+          });
+          g.advance(3);
+          equal(g.mode,'BONUS','reachable centre aim must win: '+role+' / '+order.join('')+' / '+slip+' / '+variant);
+          assert(g.wins.some(w=>w.role===role&&w.line===1),'all independently aimed reels meet on the centre line');
+          equal(E.boardAt(g.reels.map(r=>r.p)).map(b=>b[1]),[role,role,role],'visible centre symbols agree');cases++;
+        }
+      }
+      for(const role of ['BIG','REG'])for(const order of orders) {
+        const late=newSpin(role);
+        order.forEach(index=>{
+          late.devPosition(index,E.mod(-C.strips[index].indexOf(role))+.05);late.stop(index);late.advance(.02);
+        });late.advance(3);
+        equal(late.mode,'BONUS','just-passed centre is caught on the bottom horizontal line');
+        assert(late.wins.some(w=>w.line===2),'no backwards snap to the passed centre');cases++;
+        for(const missed of [0,1,2]) {
+          const g=newSpin(role);
+          order.forEach(index=>{
+            const centre=E.mod(-C.strips[index].indexOf(role));
+            // Once below the bottom row, the single bonus symbol cannot return within 4 cells.
+            g.devPosition(index,centre+(index===missed?1.05:-.5));g.stop(index);g.advance(.02);
+          });g.advance(3);
+          equal(g.mode,'NORMAL','one independently mistimed reel must not auto-align');
+          equal(g.pending,role,'real mistiming carries the bonus');assert(g.lamp,'real mistiming keeps the lamp');cases++;
+        }
+      }
+    });
     test('全3リールそれぞれの取りこぼし・持ち越し：全6停止順',()=>{
       ['BIG','REG'].forEach(role=>orders.forEach(order=>[0,1,2].forEach(missed=>{
         const g=newSpin(role);
@@ -91,6 +131,16 @@
       for(let line=0;line<5;line++) {
         const fixture=all.find(b=>b.wins.some(w=>w.role==='BIG'&&w.line===line));assert(!!fixture,'five-line fixture exists');
         const visual=E.boardAt(fixture.pos);assert(C.lines[line].every((row,r)=>visual[r][row]==='BIG'),'visible 7 matches judged line');equal(E.winsAt(fixture.pos),fixture.wins,'judgement same board');cases++;
+      }
+      for(const role of ['BIG','REG'])for(let line=0;line<5;line++) {
+        const g=newSpin(role),order=line===4?[1,0,2]:[0,1,2];
+        order.forEach(index=>{
+          const row=C.lines[line][index],target=E.mod(-C.strips[index].indexOf(role))+row-1;
+          g.devPosition(index,target+(row===0?-g.slip+.05:-.05));
+          assert(g.stop(index),'actual five-line stop');g.advance(.02);
+        });g.advance(3);
+        equal(g.mode,'BONUS','five-line control starts bonus');
+        assert(g.wins.some(w=>w.role===role&&w.line===line),'actual control preserves each of the five paylines');cases++;
       }
       ['GRAPE','CHERRY','BELL','REPLAY'].forEach(role=>orders.forEach(order=>{
         const g=newSpin(role);complete(g,order);assert(g.wins.every(w=>w.role===role),'only internal prize visible');assert(g.wins.length>0,'aimed small prize wins');
